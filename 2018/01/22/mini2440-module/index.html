@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/maziot/maziot-apple.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/maziot/maziot-32x32.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/maziot/maziot-16x16.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/maziot/maziot.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="一. 编写一个内核模块1.1 什么是内核模块Linux 内核是模块化组成的，它允许内核在运行时动态地向其中插入或从中删除代码。这些代码被一并组合在一个单独的二进制镜像中，即所谓的可装载内核模块中，或简称为模块。支持模块的好处是基本内核镜像尽可能的小，因为可选的功能和驱动程序可以利用模块形式再提供。模块允许我们方便地删除和重新载入内核代码，也方便了调试工作。而且当热插拔新设备时，可通过命令载入新的驱">
+<meta name="keywords" content="module">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Mini2440] 初识 Linux 内核模块">
+<meta property="og:url" content="http://yoursite.com/2018/01/22/mini2440-module/index.html">
+<meta property="og:site_name" content="Paul&#39;s blog">
+<meta property="og:description" content="一. 编写一个内核模块1.1 什么是内核模块Linux 内核是模块化组成的，它允许内核在运行时动态地向其中插入或从中删除代码。这些代码被一并组合在一个单独的二进制镜像中，即所谓的可装载内核模块中，或简称为模块。支持模块的好处是基本内核镜像尽可能的小，因为可选的功能和驱动程序可以利用模块形式再提供。模块允许我们方便地删除和重新载入内核代码，也方便了调试工作。而且当热插拔新设备时，可通过命令载入新的驱">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-06-06T09:42:25.191Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Mini2440] 初识 Linux 内核模块">
+<meta name="twitter:description" content="一. 编写一个内核模块1.1 什么是内核模块Linux 内核是模块化组成的，它允许内核在运行时动态地向其中插入或从中删除代码。这些代码被一并组合在一个单独的二进制镜像中，即所谓的可装载内核模块中，或简称为模块。支持模块的好处是基本内核镜像尽可能的小，因为可选的功能和驱动程序可以利用模块形式再提供。模块允许我们方便地删除和重新载入内核代码，也方便了调试工作。而且当热插拔新设备时，可通过命令载入新的驱">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/22/mini2440-module/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>[Mini2440] 初识 Linux 内核模块 | Paul's blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Paul's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">学而不思则罔 思而不学则殆</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-music">
+    <a href="/music/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-headphones"></i> <br>音乐</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/22/mini2440-module/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Paul Wang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/maziot/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paul's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Mini2440] 初识 Linux 内核模块
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-01-22 22:59:52" itemprop="dateCreated datePublished" datetime="2018-01-22T22:59:52+08:00">2018-01-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-06 17:42:25" itemprop="dateModified" datetime="2019-06-06T17:42:25+08:00">2019-06-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Mini2440/" itemprop="url" rel="index"><span itemprop="name">Mini2440</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/22/mini2440-module/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/01/22/mini2440-module/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">8.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">8 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一-编写一个内核模块"><a href="#一-编写一个内核模块" class="headerlink" title="一. 编写一个内核模块"></a>一. 编写一个内核模块</h2><h3 id="1-1-什么是内核模块"><a href="#1-1-什么是内核模块" class="headerlink" title="1.1 什么是内核模块"></a>1.1 什么是内核模块</h3><p>Linux 内核是模块化组成的，它允许内核在运行时动态地向其中插入或从中删除代码。这些代码被一并组合在一个单独的二进制镜像中，即所谓的可装载内核模块中，或简称为模块。支持模块的好处是基本内核镜像尽可能的小，因为可选的功能和驱动程序可以利用模块形式再提供。模块允许我们方便地删除和重新载入内核代码，也方便了调试工作。而且当热插拔新设备时，可通过命令载入新的驱动程序。<br>模块是具有独立功能的程序，它可以被单独编译，但不能独立运行。它在运行时被链接到内核作为内核的一部分在内核空间运行，这与运行在用户空间的进程是不同的。模块通常由一组函数和数据结构组成，用来实现一种文件系统、一个驱动程序或其他内核上层的功能。总之，模块是一个为内核或其他内核模块提供使用功能的代码块。</p>
+<h3 id="1-2-最简单的内核模块"><a href="#1-2-最简单的内核模块" class="headerlink" title="1.2 最简单的内核模块"></a>1.2 最简单的内核模块</h3><p>创建一个目录专门保存 linux 驱动代码，并开始编写第一个内核模块：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">user@ubuntu:~$ mkdir -p workspace/mini2440/driver.with.linux</span><br><span class="line">user@ubuntu:~$ <span class="built_in">cd</span> workspace/mini2440/driver.with.linux/</span><br><span class="line">user@ubuntu:~/workspace/mini2440/driver.with.linux$ mkdir -p module/simplest_module/</span><br></pre></td></tr></table></figure>
+<h4 id="文件一：simplest-module-c"><a href="#文件一：simplest-module-c" class="headerlink" title="文件一：simplest_module.c"></a>文件一：simplest_module.c</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">init <span class="title">mod_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"simplest module init ok!\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> __<span class="function"><span class="built_in">exit</span> <span class="title">mod_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"simplest module exit ok!\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module_init(mod_init);</span><br><span class="line">module_exit(mod_exit);</span><br><span class="line"></span><br><span class="line">MODULE_LICENSE(<span class="string">"GPL"</span>);</span><br></pre></td></tr></table></figure>
+<h4 id="文件二：Makefile"><a href="#文件二：Makefile" class="headerlink" title="文件二：Makefile"></a>文件二：Makefile</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">obj-m += simplest_module.o</span><br><span class="line">KERNEL = /home/user/workspace/mini2440/linux-2.6.32.2</span><br><span class="line"></span><br><span class="line">all:</span><br><span class="line">        make -C $(KERNEL) M=`<span class="built_in">pwd</span>` modules</span><br><span class="line"></span><br><span class="line">clean:</span><br><span class="line">        make -C $(KERNEL) M=`<span class="built_in">pwd</span>` modules clean</span><br></pre></td></tr></table></figure>
+<h3 id="1-3-编译加载模块"><a href="#1-3-编译加载模块" class="headerlink" title="1.3 编译加载模块"></a>1.3 编译加载模块</h3><p>执行 make 命令，编译内核模块。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">user@vmware:~/mini2440/driver.with.linux/module/simplest_module/$ make</span><br><span class="line">make -C /home/user/workspace/mini2440/linux-2.6.32.2 M=`<span class="built_in">pwd</span>` modules</span><br><span class="line">make[1]: Entering directory <span class="string">'/home/user/workspace/mini2440/linux-2.6.32.2'</span></span><br><span class="line">  Building modules, stage 2.</span><br><span class="line">  MODPOST 1 modules</span><br><span class="line">make[1]: Leaving directory <span class="string">'/home/user/workspace/mini2440/linux-2.6.32.2'</span></span><br><span class="line"></span><br><span class="line">user@vmware:~/mini2440/driver.with.linux/module/simplest_module/$ ls</span><br><span class="line">Makefile       Module.symvers  simplest_module.c   simplest_module.mod.c</span><br><span class="line">modules.order  readme.txt      simplest_module.ko  simplest_module.mod.o</span><br><span class="line">simplest_module.o</span><br></pre></td></tr></table></figure>
+<p>生成的 simplest_module.ko 文件就是可动态加载的内核模块。<br>使用 insmod 命令加载模块到内核中，将会执行 module_init(mod_init) 指定的 mod_init 函数。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@FriendlyARM /mnt]<span class="comment"># insmod simplest_module.ko</span></span><br><span class="line">simplest module init ok!</span><br></pre></td></tr></table></figure>
+<p>使用 rmmod 命令卸载模块，将会执行 module_exit(mod_exit) 指定的 mod_exit 函数。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@FriendlyARM /mnt]<span class="comment"># rmmod simplest_module</span></span><br><span class="line">simplest module <span class="built_in">exit</span> ok!</span><br></pre></td></tr></table></figure>
+<p>使用 modprobe -r 卸载模块，同 rmmod 功能。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@FriendlyARM /mnt]<span class="comment"># modprobe -r simplest_module</span></span><br><span class="line">simplest module <span class="built_in">exit</span> ok!</span><br></pre></td></tr></table></figure>
+<h2 id="二-带参数的内核模块"><a href="#二-带参数的内核模块" class="headerlink" title="二. 带参数的内核模块"></a>二. 带参数的内核模块</h2><h3 id="2-1-前言"><a href="#2-1-前言" class="headerlink" title="2.1 前言"></a>2.1 前言</h3><p>Linux 内核允许模块在加载的时候指定参数。模块接受参数传入的机制能够根据参数的不同提供多种不同的服务，增加了模块的灵活性。<br>模块参数必须使用 module_param 宏来声明，通常放在文件头部。 module_param 需要 3 个参数：变量名称、类型以及用于 sysfs 入口的访问掩码。模块最好为参数指定一个默认值，以防加载模块的时候忘记传参而带来错误。</p>
+<ul>
+<li>内核模块支持的参数类型有： bool、 invbool、 charp、 int、 short、 long、 uint、 ushort 和 ulong。</li>
+<li>访问掩码的值在<linux stat.h>定义， S_IRUGO 表示任何人都可以读取该参数，但不能修改。</linux></li>
+</ul>
+<h3 id="2-2-示例模块"><a href="#2-2-示例模块" class="headerlink" title="2.2 示例模块"></a>2.2 示例模块</h3><h4 id="文件一：param-module-c"><a href="#文件一：param-module-c" class="headerlink" title="文件一：param_module.c"></a>文件一：param_module.c</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">char</span>* name = <span class="string">"unknow"</span>;</span><br><span class="line"><span class="keyword">int</span> age = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">module_param(name, charp, S_IRUGO);</span><br><span class="line">module_param(age, <span class="keyword">int</span>, S_IRUGO);</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">init <span class="title">mod_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!<span class="built_in">strcmp</span>(name, <span class="string">"unknow"</span>) || <span class="number">-1</span> == age)</span><br><span class="line">        &#123;</span><br><span class="line">                printk(KERN_INFO <span class="string">"usage: insmod param_module name=&lt;str&gt; age=&lt;int&gt;\n"</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        printk(KERN_INFO <span class="string">"hello %s, your age is %d\n"</span>, name, age);</span><br><span class="line">        printk(KERN_INFO <span class="string">"param module init ok!\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> __<span class="function"><span class="built_in">exit</span> <span class="title">mod_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"param module exit ok!\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module_init(mod_init);</span><br><span class="line">module_exit(mod_exit);</span><br><span class="line"></span><br><span class="line">MODULE_LICENSE(<span class="string">"GPL"</span>);</span><br></pre></td></tr></table></figure>
+<h4 id="文件二：Makefile-1"><a href="#文件二：Makefile-1" class="headerlink" title="文件二：Makefile"></a>文件二：Makefile</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">obj-m += param_module.o</span><br><span class="line">KERNEL = /home/user/workspace/mini2440/linux-2.6.32.2</span><br><span class="line">SHARE = /home/user/board</span><br><span class="line"></span><br><span class="line">all:</span><br><span class="line">    make -C $(KERNEL) M=`<span class="built_in">pwd</span>` modules</span><br><span class="line">    rm -rf $(SHARE)/*</span><br><span class="line">    cp -f *.ko $(SHARE)/</span><br><span class="line">    make clean</span><br><span class="line">    @<span class="built_in">echo</span> <span class="string">"\033[31m &gt;&gt;&gt;&gt;&gt;&gt; make all successful &lt;&lt;&lt;&lt;&lt;&lt; \033[0m"</span></span><br><span class="line">clean:</span><br><span class="line">    make -C $(KERNEL) M=`<span class="built_in">pwd</span>` modules clean</span><br><span class="line">    rm -f app</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-加载模块"><a href="#2-3-加载模块" class="headerlink" title="2.3 加载模块"></a>2.3 加载模块</h3><p>不带参数加载，加载失败，提示加载参数使用方法：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@FriendlyARM /mnt]<span class="comment"># insmod param_module.ko</span></span><br><span class="line">usage: insmod param_module name=&lt;str&gt; age=&lt;int&gt;</span><br><span class="line">insmod: cannot insert <span class="string">'param_module.ko'</span>: Operation not permitted</span><br></pre></td></tr></table></figure>
+<p>带参数加载，加载成功：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@FriendlyARM /mnt]<span class="comment"># insmod param_module.ko name="bean" age=20</span></span><br><span class="line">hello bean, your age is 20</span><br><span class="line">param module init ok!</span><br><span class="line">[root@FriendlyARM /mnt]<span class="comment"># rmmod param_module</span></span><br><span class="line">param module <span class="built_in">exit</span> ok!</span><br></pre></td></tr></table></figure>
+<h2 id="三-多个c文件编译成一个模块"><a href="#三-多个c文件编译成一个模块" class="headerlink" title="三. 多个c文件编译成一个模块"></a>三. 多个c文件编译成一个模块</h2><h3 id="3-1-前言"><a href="#3-1-前言" class="headerlink" title="3.1 前言"></a>3.1 前言</h3><p>有的时候，一个驱动模块设计到功能过多，都写在一个文件中导致单个文件过大，文件结构复杂，不便于阅读和修改。那么如何将多个文件编译成为一个驱动模块呢?<br>单个文件 main.c 编译成模块，Makefile 中只需要指定 obj-m 为对应的 .o 文件即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">obj-m += main.o</span><br></pre></td></tr></table></figure>
+<p>多个文件 tp_touch.c tp_gesture.c tp_firmware.c 编译成模块 tp_mstar.ko，需要这么干：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">obj-m += tp_mstar.o</span><br><span class="line">tp_mstar-objs = tp_touch.o tp_gesture.o tp_firmware.o</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-示例模块"><a href="#3-2-示例模块" class="headerlink" title="3.2 示例模块"></a>3.2 示例模块</h3><h4 id="文件一：tp-common-h"><a href="#文件一：tp-common-h" class="headerlink" title="文件一：tp_common.h"></a>文件一：tp_common.h</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> __TP_COMMON_H__</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> __TP_COMMON_H__</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tp_print_support_gesture</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tp_print_firmware_version</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">/* __TP_COMMON_H__ */</span></span></span><br></pre></td></tr></table></figure>
+<h4 id="文件二：tp-touch-c"><a href="#文件二：tp-touch-c" class="headerlink" title="文件二：tp_touch.c"></a>文件二：tp_touch.c</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"tp_common.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">init <span class="title">mod_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        tp_print_support_gesture();</span><br><span class="line">        tp_print_firmware_version();</span><br><span class="line">        printk(KERN_INFO <span class="string">"touch module init ok!\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> __<span class="function"><span class="built_in">exit</span> <span class="title">mod_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"touch module exit ok!\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module_init(mod_init);</span><br><span class="line">module_exit(mod_exit);</span><br><span class="line"></span><br><span class="line">MODULE_LICENSE(<span class="string">"GPL"</span>);</span><br></pre></td></tr></table></figure>
+<h4 id="文件三：tp-firmware-c"><a href="#文件三：tp-firmware-c" class="headerlink" title="文件三：tp_firmware.c"></a>文件三：tp_firmware.c</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"tp_common.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tp_print_firmware_version</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"msg2836 tp firmware version = 0x10.0x06!\n"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="文件四：tp-gesture-c"><a href="#文件四：tp-gesture-c" class="headerlink" title="文件四：tp_gesture.c"></a>文件四：tp_gesture.c</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"tp_common.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tp_print_support_gesture</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"msg2836 tp support C M W O V e gesture\n"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="文件五：Makefile"><a href="#文件五：Makefile" class="headerlink" title="文件五：Makefile"></a>文件五：Makefile</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">obj-m += tp_mstar.o</span><br><span class="line">tp_mstar-objs = tp_touch.o tp_gesture.o tp_firmware.o</span><br><span class="line">KERNEL = /home/user/workspace/mini2440/linux-2.6.32.2</span><br><span class="line">SHARE = /home/user/board</span><br><span class="line"></span><br><span class="line">all:</span><br><span class="line">    make -C $(KERNEL) M=`<span class="built_in">pwd</span>` modules</span><br><span class="line">    rm -rf $(SHARE)/*</span><br><span class="line">    cp -f *.ko $(SHARE)/</span><br><span class="line">    make clean</span><br><span class="line">    @<span class="built_in">echo</span> <span class="string">"\033[31m &gt;&gt;&gt;&gt;&gt;&gt; make all successful &lt;&lt;&lt;&lt;&lt;&lt; \033[0m"</span></span><br><span class="line">clean:</span><br><span class="line">    make -C $(KERNEL) M=`<span class="built_in">pwd</span>` modules clean</span><br><span class="line">    rm -f app</span><br></pre></td></tr></table></figure>
+<h3 id="3-3-加载模块"><a href="#3-3-加载模块" class="headerlink" title="3.3 加载模块"></a>3.3 加载模块</h3><p>加载模块，不难发现，三个文件被编译成了一个模块，三个文件的 log 都打印出来了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@FriendlyARM /mnt]<span class="comment"># insmod tp_mstar.ko</span></span><br><span class="line">the matar msg2836 tp support C M W O V e gesture</span><br><span class="line">the matar msg2836 tp firmware version = 0x10.0x06!</span><br><span class="line">touch module init ok</span><br><span class="line">[root@FriendlyARM /mnt]<span class="comment"># rmmod tp_mstar</span></span><br><span class="line">touch module <span class="built_in">exit</span> ok!</span><br></pre></td></tr></table></figure>
+<h2 id="四-模块导出符号给另一个模块使用"><a href="#四-模块导出符号给另一个模块使用" class="headerlink" title="四. 模块导出符号给另一个模块使用"></a>四. 模块导出符号给另一个模块使用</h2><h3 id="4-1-前言"><a href="#4-1-前言" class="headerlink" title="4.1 前言"></a>4.1 前言</h3><p>对于模块文件中定义的函数和变量，其他模块如果想要引用的话，被引用的函数或者变量需要使用 EXPORT_SYMBOL(x) 宏导出符号，其中 x 是导出的函数名或者变量名，而引用这个函数或者变量的模块做一下外部声明即可使用。</p>
+<h3 id="4-2-示例模块"><a href="#4-2-示例模块" class="headerlink" title="4.2 示例模块"></a>4.2 示例模块</h3><h4 id="文件一：test-module-c"><a href="#文件一：test-module-c" class="headerlink" title="文件一：test_module.c"></a>文件一：test_module.c</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">extern</span> <span class="keyword">int</span> <span class="title">calculate_add</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">extern</span> <span class="keyword">int</span> <span class="title">calculate_sub</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">init <span class="title">mod_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"[%s][%d] 10 - 5 = %d\n"</span>, __func__, __LINE__, calculate_add(<span class="number">10</span>, <span class="number">5</span>));</span><br><span class="line">        printk(KERN_INFO <span class="string">"[%s][%d] 10 - 5 = %d\n"</span>, __func__, __LINE__, calculate_sub(<span class="number">10</span>, <span class="number">5</span>));</span><br><span class="line">        printk(KERN_INFO <span class="string">"test module init ok!\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> __<span class="function"><span class="built_in">exit</span> <span class="title">mod_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"test module exit ok!\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module_init(mod_init);</span><br><span class="line">module_exit(mod_exit);</span><br><span class="line"></span><br><span class="line">MODULE_LICENSE(<span class="string">"GPL"</span>);</span><br></pre></td></tr></table></figure>
+<h4 id="文件二：calculate-c"><a href="#文件二：calculate-c" class="headerlink" title="文件二：calculate.c"></a>文件二：calculate.c</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">calculate_add</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"[%s][%d] is running\n"</span>, __func__, __LINE__);</span><br><span class="line">        <span class="keyword">return</span> x + y;</span><br><span class="line">&#125;</span><br><span class="line">EXPORT_SYMBOL(calculate_add);</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">calculate_sub</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"[%s][%d] is running\n"</span>, __func__, __LINE__);</span><br><span class="line">        <span class="keyword">return</span> x - y;</span><br><span class="line">&#125;</span><br><span class="line">EXPORT_SYMBOL(calculate_sub);</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">init <span class="title">mod_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"calculate module init ok!\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> __<span class="function"><span class="built_in">exit</span> <span class="title">mod_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        printk(KERN_INFO <span class="string">"calculate module exit ok!\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module_init(mod_init);</span><br><span class="line">module_exit(mod_exit);</span><br><span class="line"></span><br><span class="line">MODULE_LICENSE(<span class="string">"GPL"</span>);</span><br></pre></td></tr></table></figure>
+<h4 id="文件三：Makefile"><a href="#文件三：Makefile" class="headerlink" title="文件三：Makefile"></a>文件三：Makefile</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">obj-m += test_module.o</span><br><span class="line">obj-m += calculate.o</span><br><span class="line">KERNEL = /home/user/workspace/mini2440/linux-2.6.32.2</span><br><span class="line">SHARE = /home/user/board</span><br><span class="line"></span><br><span class="line">all:</span><br><span class="line">    make -C $(KERNEL) M=`<span class="built_in">pwd</span>` modules</span><br><span class="line">    rm -rf $(SHARE)/*</span><br><span class="line">    cp -f *.ko $(SHARE)/</span><br><span class="line">    make clean</span><br><span class="line">    @<span class="built_in">echo</span> <span class="string">"\033[31m &gt;&gt;&gt;&gt;&gt;&gt; make all successful &lt;&lt;&lt;&lt;&lt;&lt; \033[0m"</span></span><br><span class="line">clean:</span><br><span class="line">    make -C $(KERNEL) M=`<span class="built_in">pwd</span>` modules clean</span><br><span class="line">    rm -f app</span><br></pre></td></tr></table></figure>
+<h3 id="4-3-加载模块"><a href="#4-3-加载模块" class="headerlink" title="4.3 加载模块"></a>4.3 加载模块</h3><p>若一个模块(模块A)引用了另一个模块(模块B)导出的符号，那么要求加载模块A的时候，模块B就已经被加载进内核了。否则的话，模块A将无法成功加载进内核。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@FriendlyARM /mnt]<span class="comment"># insmod test_module.ko</span></span><br><span class="line">test_module: Unknown symbol calculate_add</span><br><span class="line">test_module: Unknown symbol calculate_sub</span><br><span class="line">insmod: cannot insert <span class="string">'test_module.ko'</span>: unknown symbol <span class="keyword">in</span> module or invalid parameter</span><br></pre></td></tr></table></figure>
+<p>可以看出模块 test_module 没有加载成功，提示说找不到一些符号。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@FriendlyARM /mnt]<span class="comment"># insmod calculate.ko</span></span><br><span class="line">calculate module init ok!</span><br><span class="line">[root@FriendlyARM /mnt]<span class="comment"># insmod test_module.ko</span></span><br><span class="line">[calculate_add][6] is running</span><br><span class="line">[mod_init][9] 10 - 5 = 15</span><br><span class="line">[calculate_sub][13] is running</span><br><span class="line">[mod_init][10] 10 - 5 = 5</span><br><span class="line"><span class="built_in">test</span> module init ok!</span><br></pre></td></tr></table></figure>
+<p>加载依赖的 calculate 模块之后，test_module 正常加载了。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/maziot/weixin.png" alt="Paul Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/maziot/alipay.png" alt="Paul Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/module/" rel="tag"># module</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/21/hexo-build-the-personal-blog/" rel="next" title="[Hexo] 基于 Hexo 和 github 搭建个人博客">
+                <i class="fa fa-chevron-left"></i> [Hexo] 基于 Hexo 和 github 搭建个人博客
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/23/mini2440-printk/" rel="prev" title="[Mini2440] 内核调试手段之 printk">
+                [Mini2440] 内核调试手段之 printk <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/maziot/avatar.jpg" alt="Paul Wang">
+            
+              <p class="site-author-name" itemprop="name">Paul Wang</p>
+              <p class="site-description motion-element" itemprop="description">但行好事 莫问前程</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:mz8023yt@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/mz8023yt" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/30fc01f695b9" target="_blank" title="Jianshu"><i class="fa fa-fw fa-book"></i>Jianshu</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://mipi.org/" title="mipi" target="_blank">mipi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://git-scm.com/" title="git" target="_blank">git</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hexo.io/" title="hexo" target="_blank">hexo</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com/" title="next" target="_blank">next</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ezgif.com/" title="gif" target="_blank">gif</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fontawesome.dashgame.com/" title="font" target="_blank">font</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kernel.org/" title="kernel" target="_blank">kernel</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一-编写一个内核模块"><span class="nav-text">一. 编写一个内核模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-什么是内核模块"><span class="nav-text">1.1 什么是内核模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-最简单的内核模块"><span class="nav-text">1.2 最简单的内核模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#文件一：simplest-module-c"><span class="nav-text">文件一：simplest_module.c</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件二：Makefile"><span class="nav-text">文件二：Makefile</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-编译加载模块"><span class="nav-text">1.3 编译加载模块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-带参数的内核模块"><span class="nav-text">二. 带参数的内核模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-前言"><span class="nav-text">2.1 前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-示例模块"><span class="nav-text">2.2 示例模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#文件一：param-module-c"><span class="nav-text">文件一：param_module.c</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件二：Makefile-1"><span class="nav-text">文件二：Makefile</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-加载模块"><span class="nav-text">2.3 加载模块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三-多个c文件编译成一个模块"><span class="nav-text">三. 多个c文件编译成一个模块</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-前言"><span class="nav-text">3.1 前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-示例模块"><span class="nav-text">3.2 示例模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#文件一：tp-common-h"><span class="nav-text">文件一：tp_common.h</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件二：tp-touch-c"><span class="nav-text">文件二：tp_touch.c</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件三：tp-firmware-c"><span class="nav-text">文件三：tp_firmware.c</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件四：tp-gesture-c"><span class="nav-text">文件四：tp_gesture.c</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件五：Makefile"><span class="nav-text">文件五：Makefile</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-加载模块"><span class="nav-text">3.3 加载模块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四-模块导出符号给另一个模块使用"><span class="nav-text">四. 模块导出符号给另一个模块使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-前言"><span class="nav-text">4.1 前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-示例模块"><span class="nav-text">4.2 示例模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#文件一：test-module-c"><span class="nav-text">文件一：test_module.c</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件二：calculate-c"><span class="nav-text">文件二：calculate.c</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文件三：Makefile"><span class="nav-text">文件三：Makefile</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-加载模块"><span class="nav-text">4.3 加载模块</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Paul Wang</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">309k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">4:false</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'mz8023yt',
+            repo: 'blog.comments',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '41b269fc8cc71a77e91b3485769b325e249b15dd',
+            
+                client_id: '3b0f546a740181c255a9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('3');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

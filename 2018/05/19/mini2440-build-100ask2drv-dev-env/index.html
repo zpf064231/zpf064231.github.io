@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/maziot/maziot-apple.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/maziot/maziot-32x32.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/maziot/maziot-16x16.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/maziot/maziot.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言韦东山老师的视频使用的是 JZ2440 开发板，本来使用视频配套的 JZ2440 开发板学习起来才会事半功倍，但是目前我手头上已经有了 mini2440 开发板以及配套的 X35 LCD，想将现有资源充分利用起来。并且韦东山老师经常说天下 2440 开发板都一样，让我更加断绝了购买 JZ2440 的欲望。因此决定使用 mini2440 学习韦东山老师的视频，才有了本文。本文主要记录在 mini">
+<meta name="keywords" content="mini2440,100ask">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Mini2440] 搭建韦东山二期驱动视频学习环境">
+<meta property="og:url" content="http://yoursite.com/2018/05/19/mini2440-build-100ask2drv-dev-env/index.html">
+<meta property="og:site_name" content="Paul&#39;s blog">
+<meta property="og:description" content="前言韦东山老师的视频使用的是 JZ2440 开发板，本来使用视频配套的 JZ2440 开发板学习起来才会事半功倍，但是目前我手头上已经有了 mini2440 开发板以及配套的 X35 LCD，想将现有资源充分利用起来。并且韦东山老师经常说天下 2440 开发板都一样，让我更加断绝了购买 JZ2440 的欲望。因此决定使用 mini2440 学习韦东山老师的视频，才有了本文。本文主要记录在 mini">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-06-06T09:42:25.189Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Mini2440] 搭建韦东山二期驱动视频学习环境">
+<meta name="twitter:description" content="前言韦东山老师的视频使用的是 JZ2440 开发板，本来使用视频配套的 JZ2440 开发板学习起来才会事半功倍，但是目前我手头上已经有了 mini2440 开发板以及配套的 X35 LCD，想将现有资源充分利用起来。并且韦东山老师经常说天下 2440 开发板都一样，让我更加断绝了购买 JZ2440 的欲望。因此决定使用 mini2440 学习韦东山老师的视频，才有了本文。本文主要记录在 mini">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/19/mini2440-build-100ask2drv-dev-env/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>[Mini2440] 搭建韦东山二期驱动视频学习环境 | Paul's blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Paul's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">学而不思则罔 思而不学则殆</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-music">
+    <a href="/music/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-headphones"></i> <br>音乐</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/19/mini2440-build-100ask2drv-dev-env/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Paul Wang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/maziot/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paul's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Mini2440] 搭建韦东山二期驱动视频学习环境
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-19 19:18:11" itemprop="dateCreated datePublished" datetime="2018-05-19T19:18:11+08:00">2018-05-19</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-06 17:42:25" itemprop="dateModified" datetime="2019-06-06T17:42:25+08:00">2019-06-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Mini2440/" itemprop="url" rel="index"><span itemprop="name">Mini2440</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/19/mini2440-build-100ask2drv-dev-env/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/05/19/mini2440-build-100ask2drv-dev-env/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">22k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">20 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>韦东山老师的视频使用的是 JZ2440 开发板，本来使用视频配套的 JZ2440 开发板学习起来才会事半功倍，但是目前我手头上已经有了 mini2440 开发板以及配套的 X35 LCD，想将现有资源充分利用起来。并且韦东山老师经常说天下 2440 开发板都一样，让我更加断绝了购买 JZ2440 的欲望。因此决定使用 mini2440 学习韦东山老师的视频，才有了本文。<br>本文主要记录在 mini2440 上移植 u-boot-1.1.6 和 linux-2.6.22.6 学习环境，总结此文，以便日后查阅。  </p>
+<h3 id="一-配置编译-u-boot"><a href="#一-配置编译-u-boot" class="headerlink" title="一 配置编译 u-boot"></a>一 配置编译 u-boot</h3><h4 id="1-1-获取-u-boot-源码并打补丁"><a href="#1-1-获取-u-boot-源码并打补丁" class="headerlink" title="1.1 获取 u-boot 源码并打补丁"></a>1.1 获取 u-boot 源码并打补丁</h4><p>解压 u-boot 源码</p>
+<pre><code>user@vmware:~/mini2440$ tar jxf u-boot-1.1.6.tar.bz2
+user@vmware:~/mini2440$ cd u-boot-1.1.6/
+</code></pre><p>清除配置</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ make distclean
+</code></pre><p>创建 git 版本库管理源码</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ git init
+Initialized empty Git repository in /home/user/mini2440/u-boot-1.1.6/.git/
+user@vmware:~/mini2440/u-boot-1.1.6$ git add --all
+user@vmware:~/mini2440/u-boot-1.1.6$ git commit -m &quot;init: get the u-boot source code by 100ask.net&quot;
+</code></pre><p>给 u-boot 打补丁</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ patch -p1 &lt; ../u-boot-1.1.6_jz2440.patch
+user@vmware:~/mini2440/u-boot-1.1.6$ git add --all
+user@vmware:~/mini2440/u-boot-1.1.6$ git commit -m &quot;patch: u-boot-1.1.6_jz2440.patch&quot;
+</code></pre><h4 id="1-2-配置、编译-u-boot"><a href="#1-2-配置、编译-u-boot" class="headerlink" title="1.2 配置、编译 u-boot"></a>1.2 配置、编译 u-boot</h4><p>配置</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ make 100ask24x0_config
+Configuring for 100ask24x0 board...
+</code></pre><p>编译</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ make
+... ...
+/opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_udivsi3.o): In function `__aeabi_uidiv&apos;:
+(.text+0x0): multiple definition of `__udivsi3&apos;
+lib_arm/libarm.a(_udivsi3.o):/home/user/mini2440/u-boot-1.1.6/lib_arm/_udivsi3.S:17: first defined here
+arm-linux-ld: ERROR: Source object /opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_udivdi3.o) has EABI version 5, but target u-boot has EABI version    0
+arm-linux-ld: failed to merge target specific data of file /opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_udivdi3.o)
+arm-linux-ld: ERROR: Source object /opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_udivsi3.o) has EABI version 5, but target u-boot has EABI version    0
+arm-linux-ld: failed to merge target specific data of file /opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_udivsi3.o)
+arm-linux-ld: ERROR: Source object /opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_dvmd_lnx.o) has EABI version 5, but target u-boot has EABI version    0
+arm-linux-ld: failed to merge target specific data of file /opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_dvmd_lnx.o)
+arm-linux-ld: ERROR: Source object /opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_clz.o) has EABI version 5, but target u-boot has EABI version 0
+arm-linux-ld: failed to merge target specific data of file /opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_clz.o)
+/opt/gcc/arm/4.3.2/bin/../lib/gcc/arm-none-linux-gnueabi/4.3.2/armv4t/libgcc.a(_dvmd_lnx.o): In function `__aeabi_ldiv0&apos;:
+(.text+0x8): undefined reference to `raise&apos;
+Makefile:263: recipe for target &apos;u-boot&apos; failed
+make: *** [u-boot] Error 1
+</code></pre><p>编译报错了，百度确认到是因为我使用的编译器是友善之臂的提供的 4.3.2 版本的编译器，编译器的库文件和 U-Boot 源码中的函有重复定义，换成 100ask 光盘提供的 3.4.5 版本的编译器就不存在此问题。<br>解压 100ask 提供的交叉编译器</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ cd ../
+user@vmware:~/mini2440$ tar jxf arm-linux-gcc-3.4.5-glibc-2.3.6.tar.bz2
+user@vmware:~/mini2440$ cd gcc-3.4.5-glibc-2.3.6/bin/
+user@vmware:~/mini2440/gcc-3.4.5-glibc-2.3.6/bin$ pwd
+/home/user/mini2440/gcc-3.4.5-glibc-2.3.6/bin
+</code></pre><p>修改 u-boot 的 Makefile 指定编译使用刚刚解压的交叉编译器，修改点如下：</p>
+<pre><code>user@vmware:~/mini2440/gcc-3.4.5-glibc-2.3.6/bin$ cd ../../u-boot-1.1.6/
+user@vmware:~/mini2440/u-boot-1.1.6$ vim Makefile
+user@vmware:~/mini2440/u-boot-1.1.6$ git diff
+diff --git a/Makefile b/Makefile
+index a8fdbb1..f7ed826 100644
+--- a/Makefile
++++ b/Makefile
+@@ -125,7 +125,7 @@ ifeq ($(ARCH),ppc)
+ CROSS_COMPILE = powerpc-linux-
+ endif
+ ifeq ($(ARCH),arm)
+-CROSS_COMPILE = arm-linux-
++CROSS_COMPILE = /home/user/mini2440/gcc-3.4.5-glibc-2.3.6/bin/arm-linux-
+ endif
+ ifeq ($(ARCH),i386)
+ ifeq ($(HOSTARCH),i386)
+user@vmware:~/mini2440/u-boot-1.1.6$ git add --all
+user@vmware:~/mini2440/u-boot-1.1.6$ git commit -m &quot;conf: modify the cross compiler&quot;
+</code></pre><p>重新配置编译</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ make distclean
+user@vmware:~/mini2440/u-boot-1.1.6$ make 100ask24x0_config
+user@vmware:~/mini2440/u-boot-1.1.6$ make
+</code></pre><p>确认到 u-boot.bin 镜像成功生成</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ ls -l u-boot.bin
+-rwxrwxr-x 1 user user 198324 5月  17 22:39 u-boot.bin
+</code></pre><h4 id="1-3-给-u-boot-添加-gitignore-文件"><a href="#1-3-给-u-boot-添加-gitignore-文件" class="headerlink" title="1.3 给 u-boot 添加 .gitignore 文件"></a>1.3 给 u-boot 添加 .gitignore 文件</h4><p>编译完 u-boot 后，通过 git st 查看发现全是编译的中间文件，这些文件根本不需使用版本库进行管理，因此我们要忽略它们。<br>随便解压一个 linux 内核，拷贝内核的忽略规则</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ cd ../
+user@vmware:~/mini2440$ tar jxf linux-2.6.22.6.tar.bz2
+user@vmware:~/mini2440$ cd u-boot-1.1.6/
+user@vmware:~/mini2440/u-boot-1.1.6$ cp ../linux-2.6.22.6/.gitignore ./
+</code></pre><p>将 kernel 默认的忽略文件拷贝到 u-boot 源码中，很好，大部分的中间文件都成功忽略了，但是通过 git st 查看还是有部分中间文件没有被忽略</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ git st
+On branch master
+Untracked files:
+  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)
+
+    examples/hello_world
+    examples/hello_world.bin
+    examples/hello_world.srec
+    include/asm-arm/arch
+    include/asm-arm/proc
+    include/bmp_logo.h
+    include/config.h
+    include/config.mk
+    include/version_autogenerated.h
+    tools/bmp_logo
+    tools/crc32.c
+    tools/envcrc
+    tools/environment.c
+    tools/gen_eth_addr
+    tools/img2srec
+    tools/mkimage
+    u-boot
+    u-boot.bin
+    u-boot.map
+    u-boot.srec
+
+nothing added to commit but untracked files present (use &quot;git add&quot; to track)
+</code></pre><p>将这些文件手动添加到 .gitignore 文件中，值得注意的是，内核默认的忽略规则会将 . 开头的隐藏文件一并忽略掉，这里需要强制指定不忽略 .gitignore 文件<br>注意：<code>diff</code> 命令的 <code>&lt;</code> 相当于 <code>git diff</code> 的 <code>+</code>，<code>&gt;</code> 相当于 <code>git diff</code> 的 <code>-</code></p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ vim .gitignore
+user@vmware:~/mini2440/u-boot-1.1.6$ diff .gitignore ../linux-2.6.22.6/.gitignore
+5,29d4
+&lt;
+&lt; #
+&lt; # maiot added rules
+&lt; #
+&lt; examples/hello_world
+&lt; examples/hello_world.bin
+&lt; examples/hello_world.srec
+&lt; include/asm-arm/arch
+&lt; include/asm-arm/proc
+&lt; include/bmp_logo.h
+&lt; include/config.h
+&lt; include/config.mk
+&lt; include/version_autogenerated.h
+&lt; tools/bmp_logo
+&lt; tools/crc32.c
+&lt; tools/envcrc
+&lt; tools/environment.c
+&lt; tools/gen_eth_addr
+&lt; tools/img2srec
+&lt; tools/mkimage
+&lt; u-boot
+&lt; u-boot.bin
+&lt; u-boot.map
+&lt; u-boot.srec
+&lt;
+34,35d8
+&lt; # don&apos;t ignore the .gitignore file
+&lt; !.gitignore
+</code></pre><p>此时成功将编译的中间文件全部过滤</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ git st
+On branch master
+Untracked files:
+  (use &quot;git add &lt;file&gt;...&quot; to include in what will be committed)
+
+    .gitignore
+
+nothing added to commit but untracked files present (use &quot;git add&quot; to track)
+</code></pre><p>很好，提交忽略规则到版本库中</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ git add --all
+user@vmware:~/mini2440/u-boot-1.1.6$ git commit -m &quot;conf: add the gitignore rule&quot;
+</code></pre><h4 id="1-4-备份源码到-github-方便下次使用"><a href="#1-4-备份源码到-github-方便下次使用" class="headerlink" title="1.4 备份源码到 github 方便下次使用"></a>1.4 备份源码到 github 方便下次使用</h4><p>在 github 上创建一个空的仓库，我创建的仓库地址为：<code>git@github.com:mini2440/100ask.u-boot-1.1.6.git</code><br>查看目前本地仓库的状态，确认到并没有绑定远程仓库</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ git remote -v
+</code></pre><p>为本地仓库添加远程仓库</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ git remote add origin git@github.com:mini2440/100ask.u-boot-1.1.6.git
+user@vmware:~/mini2440/u-boot-1.1.6$ git remote -v
+origin    git@github.com:mini2440/100ask.u-boot-1.1.6.git (fetch)
+origin    git@github.com:mini2440/100ask.u-boot-1.1.6.git (push)
+</code></pre><p>将本地仓库上传到 github 远程仓库中</p>
+<pre><code>user@vmware:~/mini2440/u-boot-1.1.6$ git push origin -u master
+</code></pre><h4 id="1-5-使用-github-仓库快速获取源码"><a href="#1-5-使用-github-仓库快速获取源码" class="headerlink" title="1.5 使用 github 仓库快速获取源码"></a>1.5 使用 github 仓库快速获取源码</h4><p>直接克隆远程仓库配置编译即可<br>注意：成功克隆工程后，您需要修改 Makefile 中交叉编译器路径为您的主机上编译器安装的实际路径。</p>
+<pre><code>user@vmware:~/mini2440$ git clone git@github.com:mini2440/100ask.u-boot-1.1.6.git
+user@vmware:~/mini2440$ cd 100ask.u-boot-1.1.6/
+user@vmware:~/mini2440/100ask.u-boot-1.1.6$ make 100ask24x0_config
+user@vmware:~/mini2440/100ask.u-boot-1.1.6$ make
+user@vmware:~/mini2440/100ask.u-boot-1.1.6$ ls -l u-boot.bin
+-rwxrwxr-x 1 user user 198324 5月  20 13:15 u-boot.bin
+</code></pre><h3 id="二-配置编译-linux-内核"><a href="#二-配置编译-linux-内核" class="headerlink" title="二 配置编译 linux 内核"></a>二 配置编译 linux 内核</h3><h4 id="2-1-获取-linux-内核源码并打补丁"><a href="#2-1-获取-linux-内核源码并打补丁" class="headerlink" title="2.1 获取 linux 内核源码并打补丁"></a>2.1 获取 linux 内核源码并打补丁</h4><p>在上面 u-boot 中已经解压好了内核源码，这里直接创建仓库就好</p>
+<pre><code>user@vmware:~/mini2440$ cd linux-2.6.22.6/
+user@vmware:~/mini2440/linux-2.6.22.6$ git init
+Initialized empty Git repository in /home/user/mini2440/linux-2.6.22.6/.git/
+user@vmware:~/mini2440/linux-2.6.22.6$ git add --all
+user@vmware:~/mini2440/linux-2.6.22.6$ git commit -m &quot;init: upload the linux-2.6.22.6 source code by 100ask.net&quot;
+</code></pre><p>给 kernel 打补丁</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ patch -p1 &lt; ../linux-2.6.22.6_jz2440.patch
+user@vmware:~/mini2440/linux-2.6.22.6$ git add --all
+user@vmware:~/mini2440/linux-2.6.22.6$ git commit -m &quot;patch: linux-2.6.22.6_jz2440.patch&quot;
+</code></pre><h4 id="2-2-修改编译器"><a href="#2-2-修改编译器" class="headerlink" title="2.2 修改编译器"></a>2.2 修改编译器</h4><p>修改顶层 Makefile 指定编译使用刚刚解压的交叉编译器，修改点如下：</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ vim Makefile
+user@vmware:~/mini2440/linux-2.6.22.6$ git diff
+diff --git a/Makefile b/Makefile
+index 9b456d0..e98b548 100644
+--- a/Makefile
++++ b/Makefile
+@@ -184,7 +184,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc64/ \
+
+ #ARCH          ?= $(SUBARCH)
+ ARCH           ?= arm
+-CROSS_COMPILE  ?= arm-linux-
++CROSS_COMPILE  ?= /home/user/mini2440/gcc-3.4.5-glibc-2.3.6/bin/arm-linux-
+
+ # Architecture as present in compile.h
+ UTS_MACHINE := $(ARCH)
+user@vmware:~/mini2440/linux-2.6.22.6$ git add --all
+user@vmware:~/mini2440/linux-2.6.22.6$ git commit -m &quot;conf: modify the cross compiler&quot;
+</code></pre><h4 id="2-3-配置编译内核"><a href="#2-3-配置编译内核" class="headerlink" title="2.3 配置编译内核"></a>2.3 配置编译内核</h4><p>直接使用 100ask 提供的配置文件配置内核</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ cp config_ok .config
+</code></pre><p>执行 make 命令开始编译</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ make uImage
+Makefile:1451: *** mixed implicit and normal rules: deprecated syntax
+/home/user/mini2440/linux-2.6.22.6/Makefile:418: *** mixed implicit and normal rules: deprecated syntax
+/home/user/mini2440/linux-2.6.22.6/Makefile:1451: *** mixed implicit and normal rules: deprecated syntax
+make[1]: *** No rule to make target &apos;silentoldconfig&apos;.  Stop.
+  CHK     include/linux/version.h
+make: *** No rule to make target &apos;include/config/auto.conf&apos;, needed by &apos;include/asm-arm/.arch&apos;.  Stop.
+</code></pre><p>很遗憾，报错了，百度得到的结论是由于我的系统的 make 工具太新，新工具不兼容旧版规则，参考<a href="https://blog.csdn.net/sinat_24088685/article/details/51009472" target="_blank" rel="noopener">Maxwell的博客</a>修改，修改点如下：</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ vim Makefile +416
+user@vmware:~/mini2440/linux-2.6.22.6$ git diff
+diff --git a/Makefile b/Makefile
+index d6806d0..a52ab44 100644
+--- a/Makefile
++++ b/Makefile
+@@ -415,7 +415,7 @@ ifeq ($(config-targets),1)
+ include $(srctree)/arch/$(ARCH)/Makefile
+ export KBUILD_DEFCONFIG
+
+-config %config: scripts_basic outputmakefile FORCE
++%config: scripts_basic outputmakefile FORCE
+        $(Q)mkdir -p include/linux include/config
+        $(Q)$(MAKE) $(build)=scripts/kconfig $@
+
+@@ -1448,7 +1448,7 @@ endif
+        $(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+
+ # Modules
+-/ %/: prepare scripts FORCE
++%/: prepare scripts FORCE
+        $(Q)$(MAKE) KBUILD_MODULES=$(if $(CONFIG_MODULES),1) \
+        $(build)=$(build-dir)
+ %.ko: prepare scripts FORCE
+user@vmware:~/mini2440/linux-2.6.22.6$ git add Makefile
+user@vmware:~/mini2440/linux-2.6.22.6$ git commit -m &quot;conf: fix new make tool can&apos;t compatible the old kernel&quot;
+</code></pre><p>修改好后重新 make 试试</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ make uImage
+... ...
+  LD      arch/arm/boot/compressed/vmlinux
+  OBJCOPY arch/arm/boot/zImage
+  Kernel: arch/arm/boot/zImage is ready
+  UIMAGE  arch/arm/boot/uImage
+&quot;mkimage&quot; command not found - U-Boot images will not be built
+  Image arch/arm/boot/uImage is read
+</code></pre><p>很遗憾 uImage 还是没有成功编译出来，提示说需要 mkimage 工具，安装 mkimage 后试试</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ sudo apt-get install u-boot-tools
+user@vmware:~/mini2440/linux-2.6.22.6$ make uImage
+... ...
+Image Name:   Linux-2.6.22.6
+Created:      Tue May  1 19:39:40 2018
+Image Type:   ARM Linux Kernel Image (uncompressed)
+Data Size:    1812732 Bytes = 1770.25 kB = 1.73 MB
+Load Address: 30008000
+Entry Point:  30008000
+  Image arch/arm/boot/uImage is ready
+user@vmware:~/mini2440/linux-2.6.22.6$ ls -l arch/arm/boot/uImage
+-rw-rw-r-- 1 user user 1845932 5月  20 20:59 arch/arm/boot/uImage
+</code></pre><h4 id="2-4-修改-lcd-驱动"><a href="#2-4-修改-lcd-驱动" class="headerlink" title="2.4 修改 lcd 驱动"></a>2.4 修改 lcd 驱动</h4><p>由于我使用的是 mini2440 开发板，配套的 LCD 是 X35，使用 100ask 提供的 lcd 驱动无法直接点亮，因此需要修改 lcd 驱动文件。参考<a href="https://blog.csdn.net/comwise/article/details/11727445" target="_blank" rel="noopener">comwise的博客</a>将 X35 屏幕的驱动移植到 kenrel 中，可以点亮 LCD。<br>注意：博客提供的 LCD 驱动，直接移植好后编译会报错，需要屏蔽其中三行报错的头文件。<br>我将修改好的 LCD 驱动和网卡驱动放了一份在 <code>git@github.com:mini2440/100ask.lcd.and.net.driver.git</code> 仓库中，可以克隆这个仓库获取，获取仓库的命令如下</p>
+<pre><code>user@vmware:~/mini2440$ git clone git@github.com:mini2440/100ask.lcd.and.net.driver.git
+</code></pre><p>拷贝 LCD 驱动到内核中</p>
+<pre><code>user@vmware:~/mini2440$ cp -av 100ask.lcd.and.net.driver/drivers/video/mini2440_lcd_x35.c linux-2.6.22.6/drivers/video/
+&apos;100ask.lcd.and.net.driver/drivers/video/mini2440_lcd_x35.c&apos; -&gt; &apos;linux-2.6.22.6/drivers/video/mini2440_lcd_x35.c&apos;
+</code></pre><p>修改驱动目录下的 Makefile 使驱动被编译到</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ vim drivers/video/Makefile
+user@vmware:~/mini2440/linux-2.6.22.6$ git diff
+diff --git a/drivers/video/Makefile b/drivers/video/Makefile
+old mode 100644
+new mode 100755
+index bd8b052..6f40cae
+--- a/drivers/video/Makefile
++++ b/drivers/video/Makefile
+@@ -106,7 +106,11 @@ obj-$(CONFIG_FB_MAXINE)    += maxinefb.o
+ obj-$(CONFIG_FB_TX3912)                        += tx3912fb.o
+ obj-$(CONFIG_FB_S1D13XXX)                      += s1d13xxxfb.o
+ obj-$(CONFIG_FB_IMX)                           += imxfb.o
+-obj-$(CONFIG_FB_S3C2410)                       += s3c2410fb.o
++
++# mz8023yt@163.com 20180520 begin &gt;&gt;&gt; [2/2] realize the mini2440 x35 lcd driver
++obj-$(CONFIG_FB_S3C2410)                       += mini2440_lcd_x35.o
++# mz8023yt@163.com 20180520 end   &lt;&lt;&lt; [2/2] realize the mini2440 x35 lcd driver
++
+ obj-$(CONFIG_FB_PNX4008_DUM)                   += pnx4008/
+ obj-$(CONFIG_FB_PNX4008_DUM_RGB)               += pnx4008/
+ obj-$(CONFIG_FB_IBM_GXT4500)                   += gxt4500.o
+user@vmware:~/mini2440/linux-2.6.22.6$ git add --all
+user@vmware:~/mini2440/linux-2.6.22.6$ git commit -m &quot;feature: realize the mini2440 x35 lcd driver&quot;
+</code></pre><p>重新 make</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ make uImage
+</code></pre><h4 id="2-5-修改网卡驱动"><a href="#2-5-修改网卡驱动" class="headerlink" title="2.5 修改网卡驱动"></a>2.5 修改网卡驱动</h4><p>同理，修改网卡也是一样的，拷贝网卡驱动到内核中</p>
+<pre><code>user@vmware:~/mini2440$ cp -av 100ask.lcd.and.net.driver/drivers/net/mini2440_dm9000.c linux-2.6.22.6/drivers/net/
+&apos;100ask.lcd.and.net.driver/drivers/net/mini2440_dm9000.c&apos; -&gt; &apos;linux-2.6.22.6/drivers/net/mini2440_dm9000.c&apos;
+</code></pre><p>修改驱动目录下的 Makefile 使驱动被编译到</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ git diff
+diff --git a/drivers/net/Makefile b/drivers/net/Makefile
+old mode 100644
+new mode 100755
+index e819674..0e714ce
+--- a/drivers/net/Makefile
++++ b/drivers/net/Makefile
+@@ -194,7 +194,11 @@ obj-$(CONFIG_S2IO)     += s2io.o
+ obj-$(CONFIG_MYRI10GE)                     += myri10ge/
+ obj-$(CONFIG_SMC91X)                       += smc91x.o
+ obj-$(CONFIG_SMC911X)                      += smc911x.o
+-obj-$(CONFIG_DM9000)                       += dm9dev9000c.o
++
++# mz8023yt@163.com 20180520 begin &gt;&gt;&gt; [2/2] realize the dm9000 net driver
++obj-$(CONFIG_DM9000)                       += mini2440_dm9000.o
++# mz8023yt@163.com 20180520 end   &lt;&lt;&lt; [2/2] realize the dm9000 net driver
++
+ #obj-$(CONFIG_DM9000)                      += dm9000.o
+ #obj-$(CONFIG_DM9000)                      += dm9ks.o
+ obj-$(CONFIG_FEC_8XX)                      += fec_8xx/
+user@vmware:~/mini2440/linux-2.6.22.6$ git add --all
+user@vmware:~/mini2440/linux-2.6.22.6$ git commit -m &quot;feature: realize the mini2440 x35 lcd driver&quot;
+</code></pre><p>重新 make</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ make uImage
+</code></pre><h4 id="2-6-提交忽略规则文件"><a href="#2-6-提交忽略规则文件" class="headerlink" title="2.6 提交忽略规则文件"></a>2.6 提交忽略规则文件</h4><p>修改 .gitignore 文件，在 <code>.*</code> 后追加 <code>!.gitignore</code>，不忽略 .gitignore 文件，这样才可以将忽略规则一并提交到 github 仓库中。</p>
+<pre><code>user@vmware:~/mini2440$ vim .gitignore
+user@vmware:~/mini2440$ git diff
+diff --git a/.gitignore b/.gitignore
+index a8b11d5..56b2db9 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -7,8 +7,10 @@
+ #
+ .*
++
++# don&apos;t ignore the .gitignore file
++!.gitignore
++
+ *.o
+ *.a
+@@ -26,6 +28,12 @@
+ tags
+ TAGS
+ vmlinux*
++
++# don&apos;t ignore the vmlinux.lds.* file
++!vmlinux.lds.*
++
+ System.map
+ Module.symvers
+
+user@vmware:~/mini2440/linux-2.6.22.6$ git add --all
+user@vmware:~/mini2440/linux-2.6.22.6$ git commit -m &quot;conf: add the git ignore files&quot;
+</code></pre><p>备注：这里为什么要取消忽略 <code>!vmlinux.lds.*</code>，是因为我之前使用 kernel 默认的忽略规则，将版本库上传到 github 上，再下载下来 make 的时候，编译不过，发现找不到一些依赖文件，我才意识到可能是我的忽略规则存在问题，某些必须的文件的被忽略掉了，导致这些必要的文件没有提交到版本库中。<br>因此用解压打完 patch 未编译的源码和 github 上 clone 下来的源码做对比，发现少了下面这几个文件：</p>
+<ol>
+<li>arch/alpha/kernel/vmlinux.lds.S</li>
+<li>arch/arm/boot/compressed/vmlinux.lds.in</li>
+<li>arch/arm/kernel/vmlinux.lds.S</li>
+<li>include/asm-generic/vmlinux.lds.h</li>
+</ol>
+<p>因此确认到是 <code>vmlinux*</code> 忽略规则将这些文件忽略掉了，故添加 <code>!vmlinux.lds.*</code> 规则不忽略上述文件，保证版本可以编译通过。</p>
+<h4 id="2-7-备份源码到-github-方便下次使用"><a href="#2-7-备份源码到-github-方便下次使用" class="headerlink" title="2.7 备份源码到 github 方便下次使用"></a>2.7 备份源码到 github 方便下次使用</h4><p>在 github 上创建一个空的仓库，我创建的仓库地址为：<code>git@github.com:mini2440/100ask.linux-2.6.22.6.git</code><br>查看目前本地仓库的状态，确认到并没有绑定远程仓库</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ git remote -v
+</code></pre><p>为本地仓库添加远程仓库</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ git remote add origin git@github.com:mini2440/100ask.linux-2.6.22.6.git
+user@vmware:~/mini2440/linux-2.6.22.6$ git remote -v
+origin    git@github.com:mini2440/100ask.linux-2.6.22.6.git (fetch)
+origin    git@github.com:mini2440/100ask.linux-2.6.22.6.git (push)
+</code></pre><p>将本地仓库上传到 github 远程仓库中</p>
+<pre><code>user@vmware:~/mini2440/linux-2.6.22.6$ git push origin -u master
+</code></pre><h4 id="2-8-使用-github-仓库快速获取源码"><a href="#2-8-使用-github-仓库快速获取源码" class="headerlink" title="2.8 使用 github 仓库快速获取源码"></a>2.8 使用 github 仓库快速获取源码</h4><pre><code>user@vmware:~/mini2440$ git clone git@github.com:mini2440/100ask.linux-2.6.22.6.git
+user@vmware:~/mini2440$ cd 100ask.linux-2.6.22.6/
+user@vmware:~/mini2440/100ask.linux-2.6.22.6$ cp config_ok .config
+user@vmware:~/mini2440/100ask.linux-2.6.22.6$ make uImage
+</code></pre><h3 id="三-重烧整个系统"><a href="#三-重烧整个系统" class="headerlink" title="三 重烧整个系统"></a>三 重烧整个系统</h3><h4 id="3-1-下载-u-boot-到-nandflash-上"><a href="#3-1-下载-u-boot-到-nandflash-上" class="headerlink" title="3.1 下载 u-boot 到 nandflash 上"></a>3.1 下载 u-boot 到 nandflash 上</h4><p>将 u-boot.bin 拷贝到 windows 目录下，这里我拷贝到 <code>D:\work\</code> 目录下，使用 oflash 工具下载到 nandflash 中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">Microsoft Windows [版本 6.1.7600]</span><br><span class="line">版权所有 (c) 2009 Microsoft Corporation。保留所有权利。</span><br><span class="line"></span><br><span class="line">C:\Users\Administrator&gt;d:</span><br><span class="line"></span><br><span class="line">D:\&gt;cd work</span><br><span class="line"></span><br><span class="line">D:\work&gt;oflash 0 1 0 0 0 u-boot.bin</span><br><span class="line"></span><br><span class="line">+---------------------------------------------------------+</span><br><span class="line">|   Flash Programmer v1.5.2 for OpenJTAG of www.100ask.net  |</span><br><span class="line">|   OpenJTAG is a USB to JTAG &amp; RS232 tool based FT2232   |</span><br><span class="line">|   This programmer supports both of S3C24X0 &amp; S3C6410    |</span><br><span class="line">|   Author: Email/MSN(thisway.diy@163.com), QQ(17653039)  |</span><br><span class="line">+---------------------------------------------------------+</span><br><span class="line">Usage:</span><br><span class="line">1. oflash, run with cfg.txt or prompt</span><br><span class="line">2. oflash [file], write [file] to flash with prompt</span><br><span class="line">3. oflash [-f config_file]</span><br><span class="line">4. oflash [jtag_type] [cpu_type] [flash_type] [read_or_write] [offset] [file]</span><br><span class="line">Select the JTAG type:</span><br><span class="line">0. OpenJTAG</span><br><span class="line">1. Dongle JTAG(parallel port)</span><br><span class="line">2. Wiggler JTAG(parallel port)</span><br><span class="line">Enter the number: 0</span><br><span class="line">Select the CPU:</span><br><span class="line">0. S3C2410</span><br><span class="line">1. S3C2440</span><br><span class="line">2. S3C6410</span><br><span class="line">Enter the number: 1</span><br><span class="line"></span><br><span class="line">device: 4 &quot;2232C&quot;</span><br><span class="line">deviceID: 0x14575118</span><br><span class="line">SerialNumber: FThecwJmA</span><br><span class="line">Description: USB&lt;=&gt;JTAG&amp;RS232 AS3C2440 detected, cpuID = 0x0032409d</span><br><span class="line"></span><br><span class="line">[Main Menu]</span><br><span class="line"> 0:Nand Flash prog     1:Nor Flash prog   2:Memory Rd/Wr     3:Exit</span><br><span class="line">Select the function to test:0</span><br><span class="line"></span><br><span class="line">[NAND Flash JTAG Programmer]</span><br><span class="line">Scan nand flash:</span><br><span class="line">Device 0: NAND 256MiB 3,3V 8-bit, sector size 128 KiB</span><br><span class="line">Total size: 256 MiB</span><br><span class="line"> 0:Nand Flash Program      1:Nand Flash Print BlkPage   2:Exit</span><br><span class="line">Select the function to test :0</span><br><span class="line"></span><br><span class="line">[NAND Flash Writing Program]</span><br><span class="line"></span><br><span class="line">Source size: 0x306b4</span><br><span class="line"></span><br><span class="line">Available target block number: 0~2047</span><br><span class="line">Input target block number:0</span><br><span class="line">target start block number     =0</span><br><span class="line">target size        (0x20000*2) =0x40000</span><br><span class="line">STATUS:</span><br><span class="line">Epppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp</span><br><span class="line">Eppppppppppppppppppppppppppppppppp</span><br></pre></td></tr></table></figure>
+<h4 id="3-2-使用-nandflash-启动开发板"><a href="#3-2-使用-nandflash-启动开发板" class="headerlink" title="3.2 使用 nandflash 启动开发板"></a>3.2 使用 nandflash 启动开发板</h4><p>成功下载 u-boot.bin 到 nandflash 后，将启动选项设置为 nand 启动，上电有以下 log 输出说明 u-boot 成功运行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">U-Boot 1.1.6-g48373b63 (May 17 2018 - 22:46:07)</span><br><span class="line"></span><br><span class="line">DRAM:  64 MB</span><br><span class="line">Flash:  0 kB</span><br><span class="line">NAND:  256 MiB</span><br><span class="line">In:    serial</span><br><span class="line">Out:   serial</span><br><span class="line">Err:   serial</span><br><span class="line">UPLLVal [M:38h,P:2h,S:2h]</span><br><span class="line">MPLLVal [M:5ch,P:1h,S:1h]</span><br><span class="line">CLKDIVN:5h</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">+---------------------------------------------+</span><br><span class="line">| S3C2440A USB Downloader ver R0.03 2004 Jan  |</span><br><span class="line">+---------------------------------------------+</span><br><span class="line">USB: IN_ENDPOINT:1 OUT_ENDPOINT:3</span><br><span class="line">FORMAT: &lt;ADDR(DATA):4&gt;+&lt;SIZE(n+10):4&gt;+&lt;DATA:n&gt;+&lt;CS:2&gt;</span><br><span class="line">NOTE: Power off/on or press the reset button for 1 sec</span><br><span class="line">      in order to get a valid USB device address.</span><br><span class="line"></span><br><span class="line">Hit any key to stop autoboot:  0</span><br><span class="line"></span><br><span class="line">##### 100ask Bootloader for OpenJTAG #####</span><br><span class="line">[n] Download u-boot to Nand Flash</span><br><span class="line">[k] Download Linux kernel uImage</span><br><span class="line">[j] Download root_jffs2 image</span><br><span class="line">[y] Download root_yaffs image</span><br><span class="line">[d] Download to SDRAM &amp; Run</span><br><span class="line">[z] Download zImage into RAM</span><br><span class="line">[g] Boot linux from RAM</span><br><span class="line">[f] Format the Nand Flash</span><br><span class="line">[s] Set the boot parameters</span><br><span class="line">[b] Boot the system</span><br><span class="line">[r] Reboot u-boot</span><br><span class="line">[q] Quit from menu</span><br><span class="line">Enter your selection: q</span><br><span class="line">OpenJTAG&gt;</span><br></pre></td></tr></table></figure>
+<h4 id="3-3-下载-kernel-到-nandflash-上"><a href="#3-3-下载-kernel-到-nandflash-上" class="headerlink" title="3.3 下载 kernel 到 nandflash 上"></a>3.3 下载 kernel 到 nandflash 上</h4><p>u-boot 成功烧写后，便可以使用 u-boot 的 tftp 命令可以下载文件到 SDRAM 中。</p>
+<p>使用 tftp 命令下载的前提是：</p>
+<ol>
+<li>开发板和 Windows 主机通过网线接在同一个路由器上</li>
+<li>Windows 主机上启动了 TPTP 服务</li>
+</ol>
+<p>配置好 Windows 主机的 ip，这里我的 Windows 主机的 ip 配置为 192.168.1.5。Windows 主机行运行 tftp 服务器软件，服务器 ip 默认就是 Windows 主机 ip。同时将要通过通过 tftp 下载到开发板的文件拷贝到 tftpd32.exe 服务器软件同级目录下。这里我拷贝了内核文件 uImage 和文件系统 fs_qtopia.yaffs2 到 tftp 目录下。  </p>
+<p>依次执行以下步骤将 kernel 烧写到 nandflash 中：</p>
+<ol>
+<li><p>配置好开发板的 ip 以及 tftp 服务器 ip<br>上电后，按下空格进入 U-Boot，执行下面的命令设置环境变量中开发板的 ip 为 192.168.1.8，指定 tftp 服务器的 ip 为 192.168.1.5。</p>
+<pre><code>OpenJTAG&gt; setenv ipaddr 192.168.1.100
+OpenJTAG&gt; setenv serverip 192.168.1.5
+OpenJTAG&gt; save
+OpenJTAG&gt; reset
+</code></pre><p>使用小米路由器的话请使用下面的命令进行配置，需要多配置网关 ip 这一项：</p>
+<pre><code>OpenJTAG&gt; setenv ipaddr 192.168.31.230
+OpenJTAG&gt; setenv serverip 192.168.31.43
+OpenJTAG&gt; setenv gatewayip 192.168.31.1
+OpenJTAG&gt; save
+OpenJTAG&gt; reset
+</code></pre></li>
+<li><p>重启 U-Boot 之后使用 tftp 命令将 tftp 服务器中的文件下载到 SDRAM 0x30000000 地址处  </p>
+<pre><code>OpenJTAG&gt; tftp 30000000 uImage
+</code></pre></li>
+<li><p>擦除 kernel 分区后再烧写到 nandflash 中<br>所谓的 kernel 分区其实只是 nandfalsh 中 0x00060000 - 0x00260000 这段地址空间</p>
+<pre><code>OpenJTAG&gt; nand erase kernel
+</code></pre><p>接下来要烧写到 nandflash 中，下面两条命令效果一致，二选一即可</p>
+<pre><code>OpenJTAG&gt; nand write.jffs2 30000000 kernel
+OpenJTAG&gt; nand write.jffs2 30000000 60000 200000
+</code></pre><p>这条命令的意思是：将 SDRAM 中 0x30000000 地址开始连续 0x200000 个字节写入 nandflash 0x60000 地址中去</p>
+</li>
+</ol>
+<h4 id="3-4-下载文件系统到-nandflash-上"><a href="#3-4-下载文件系统到-nandflash-上" class="headerlink" title="3.4 下载文件系统到 nandflash 上"></a>3.4 下载文件系统到 nandflash 上</h4><p>同样的方式，执行下列命令可以将文件系统烧写到 nandflash 中</p>
+<pre><code>OpenJTAG&gt; tftp 30000000 fs_qtopia.yaffs2
+OpenJTAG&gt; nand erase root
+</code></pre><p>烧写到 nandflash 中，下面三条命令效果一致，三选一即可</p>
+<pre><code>OpenJTAG&gt; nand write.yaffs 30000000 root
+OpenJTAG&gt; nand write.yaffs 30000000 260000 $(filesize)
+OpenJTAG&gt; nand write.yaffs 30000000 260000 2f76b40
+</code></pre><p>上面烧写命令的含义其实就是，将 SDRAM 中 0x30000000 地址开始连续 0x2f76b40(49769280) 个字节写入 nandflash 0x260000 地址中去。不难发现其实 2f76b40 这个值就是 fs_qtopia.yaffs2 文件的大小。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/maziot/weixin.png" alt="Paul Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/maziot/alipay.png" alt="Paul Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mini2440/" rel="tag"># mini2440</a>
+          
+            <a href="/tags/100ask/" rel="tag"># 100ask</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/28/odm-add-PhoneInfoTest-cmd/" rel="next" title="[ODM] 新增 PhoneInfoTest 命令">
+                <i class="fa fa-chevron-left"></i> [ODM] 新增 PhoneInfoTest 命令
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/31/odm-tp-debug-instance/" rel="prev" title="[ODM] TP 相关 debug 实例">
+                [ODM] TP 相关 debug 实例 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/maziot/avatar.jpg" alt="Paul Wang">
+            
+              <p class="site-author-name" itemprop="name">Paul Wang</p>
+              <p class="site-description motion-element" itemprop="description">但行好事 莫问前程</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:mz8023yt@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/mz8023yt" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/30fc01f695b9" target="_blank" title="Jianshu"><i class="fa fa-fw fa-book"></i>Jianshu</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://mipi.org/" title="mipi" target="_blank">mipi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://git-scm.com/" title="git" target="_blank">git</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hexo.io/" title="hexo" target="_blank">hexo</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com/" title="next" target="_blank">next</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ezgif.com/" title="gif" target="_blank">gif</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fontawesome.dashgame.com/" title="font" target="_blank">font</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kernel.org/" title="kernel" target="_blank">kernel</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一-配置编译-u-boot"><span class="nav-text">一 配置编译 u-boot</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-获取-u-boot-源码并打补丁"><span class="nav-text">1.1 获取 u-boot 源码并打补丁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-配置、编译-u-boot"><span class="nav-text">1.2 配置、编译 u-boot</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-给-u-boot-添加-gitignore-文件"><span class="nav-text">1.3 给 u-boot 添加 .gitignore 文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-4-备份源码到-github-方便下次使用"><span class="nav-text">1.4 备份源码到 github 方便下次使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-5-使用-github-仓库快速获取源码"><span class="nav-text">1.5 使用 github 仓库快速获取源码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二-配置编译-linux-内核"><span class="nav-text">二 配置编译 linux 内核</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-获取-linux-内核源码并打补丁"><span class="nav-text">2.1 获取 linux 内核源码并打补丁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-修改编译器"><span class="nav-text">2.2 修改编译器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-配置编译内核"><span class="nav-text">2.3 配置编译内核</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-修改-lcd-驱动"><span class="nav-text">2.4 修改 lcd 驱动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-修改网卡驱动"><span class="nav-text">2.5 修改网卡驱动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-6-提交忽略规则文件"><span class="nav-text">2.6 提交忽略规则文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-7-备份源码到-github-方便下次使用"><span class="nav-text">2.7 备份源码到 github 方便下次使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-8-使用-github-仓库快速获取源码"><span class="nav-text">2.8 使用 github 仓库快速获取源码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三-重烧整个系统"><span class="nav-text">三 重烧整个系统</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-下载-u-boot-到-nandflash-上"><span class="nav-text">3.1 下载 u-boot 到 nandflash 上</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-使用-nandflash-启动开发板"><span class="nav-text">3.2 使用 nandflash 启动开发板</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-下载-kernel-到-nandflash-上"><span class="nav-text">3.3 下载 kernel 到 nandflash 上</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-下载文件系统到-nandflash-上"><span class="nav-text">3.4 下载文件系统到 nandflash 上</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Paul Wang</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">309k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">4:false</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'mz8023yt',
+            repo: 'blog.comments',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '41b269fc8cc71a77e91b3485769b325e249b15dd',
+            
+                client_id: '3b0f546a740181c255a9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('3');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

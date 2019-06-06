@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/maziot/maziot-apple.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/maziot/maziot-32x32.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/maziot/maziot-16x16.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/maziot/maziot.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="一. 内核编译初体验1.1 获取 Linux 内核视频和资料可以访问百问网论坛获取。下载好资料后在 “JZ2440资料光盘” 文件中可以获取到内核和对应的补丁文件。  内核源码包：光盘/system/linux-2.6.22.6.tar.bz2 内核补丁包：光盘/system/linux-2.6.22.6_jz2440.patch。  1.2 解压内核并给内核打补丁将获取到的内核文件放在虚拟机 ~">
+<meta name="keywords" content="boot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Linux] 内核启动流程分析">
+<meta property="og:url" content="http://yoursite.com/2018/03/10/linux-boot-flow/index.html">
+<meta property="og:site_name" content="Paul&#39;s blog">
+<meta property="og:description" content="一. 内核编译初体验1.1 获取 Linux 内核视频和资料可以访问百问网论坛获取。下载好资料后在 “JZ2440资料光盘” 文件中可以获取到内核和对应的补丁文件。  内核源码包：光盘/system/linux-2.6.22.6.tar.bz2 内核补丁包：光盘/system/linux-2.6.22.6_jz2440.patch。  1.2 解压内核并给内核打补丁将获取到的内核文件放在虚拟机 ~">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-06-06T09:42:25.188Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Linux] 内核启动流程分析">
+<meta name="twitter:description" content="一. 内核编译初体验1.1 获取 Linux 内核视频和资料可以访问百问网论坛获取。下载好资料后在 “JZ2440资料光盘” 文件中可以获取到内核和对应的补丁文件。  内核源码包：光盘/system/linux-2.6.22.6.tar.bz2 内核补丁包：光盘/system/linux-2.6.22.6_jz2440.patch。  1.2 解压内核并给内核打补丁将获取到的内核文件放在虚拟机 ~">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/10/linux-boot-flow/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>[Linux] 内核启动流程分析 | Paul's blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Paul's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">学而不思则罔 思而不学则殆</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-music">
+    <a href="/music/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-headphones"></i> <br>音乐</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/10/linux-boot-flow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Paul Wang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/maziot/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paul's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Linux] 内核启动流程分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-03-10 22:46:39" itemprop="dateCreated datePublished" datetime="2018-03-10T22:46:39+08:00">2018-03-10</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-06 17:42:25" itemprop="dateModified" datetime="2019-06-06T17:42:25+08:00">2019-06-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/03/10/linux-boot-flow/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/03/10/linux-boot-flow/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">6.2k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">6 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一-内核编译初体验"><a href="#一-内核编译初体验" class="headerlink" title="一. 内核编译初体验"></a>一. 内核编译初体验</h2><h3 id="1-1-获取-Linux-内核"><a href="#1-1-获取-Linux-内核" class="headerlink" title="1.1 获取 Linux 内核"></a>1.1 获取 Linux 内核</h3><p>视频和资料可以访问<a href="http://www.100ask.net/bbs/forum.php" target="_blank" rel="noopener">百问网</a>论坛获取。<br>下载好资料后在 “JZ2440资料光盘” 文件中可以获取到内核和对应的补丁文件。</p>
+<ol>
+<li>内核源码包：光盘/system/linux-2.6.22.6.tar.bz2</li>
+<li>内核补丁包：光盘/system/linux-2.6.22.6_jz2440.patch。</li>
+</ol>
+<h3 id="1-2-解压内核并给内核打补丁"><a href="#1-2-解压内核并给内核打补丁" class="headerlink" title="1.2 解压内核并给内核打补丁"></a>1.2 解压内核并给内核打补丁</h3><p>将获取到的内核文件放在虚拟机 ~/workspace/jz2440/package 目录下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">user@vmware:~/workspace/jz2440/package$ tar -jxf linux-2.6.22.6.tar.bz2 -C ../</span><br><span class="line">user@vmware:~/workspace/jz2440/package$ <span class="built_in">cd</span> ../linux-2.6.22.6/</span><br><span class="line">user@vmware:~/workspace/jz2440/linux-2.6.22.6$ patch -p1 &lt; ../package/linux-2.6.22.6_jz2440.patch</span><br></pre></td></tr></table></figure>
+<p>先介绍一下打补丁的方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">patch -pnum &lt; &lt;补丁文件&gt;</span><br></pre></td></tr></table></figure>
+<p>打到哪里补丁文件中会指出，-p 选项则表示忽略补丁文件的前级目录，num 表示忽略的目录级数。</p>
+<h3 id="1-3-配置内核"><a href="#1-3-配置内核" class="headerlink" title="1.3 配置内核"></a>1.3 配置内核</h3><h4 id="方式一：通过-menu-菜单直接配置"><a href="#方式一：通过-menu-菜单直接配置" class="headerlink" title="方式一：通过 menu 菜单直接配置"></a>方式一：通过 menu 菜单直接配置</h4><p>使用这种方式，从头到尾每一项都要我们自己配置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make menuconfig</span><br></pre></td></tr></table></figure>
+<h4 id="方式二：使用默认配置文件配置，默认配置的文件位于：arch-arm-configs。"><a href="#方式二：使用默认配置文件配置，默认配置的文件位于：arch-arm-configs。" class="headerlink" title="方式二：使用默认配置文件配置，默认配置的文件位于：arch/arm/configs。"></a>方式二：使用默认配置文件配置，默认配置的文件位于：arch/arm/configs。</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make s3c2440_defconfig</span><br><span class="line">make menuconfig</span><br></pre></td></tr></table></figure>
+<h4 id="方式三：使用厂家提供的配置文件配置。"><a href="#方式三：使用厂家提供的配置文件配置。" class="headerlink" title="方式三：使用厂家提供的配置文件配置。"></a>方式三：使用厂家提供的配置文件配置。</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp config_ok .config</span><br><span class="line">make menuconfig</span><br></pre></td></tr></table></figure>
+<p>所有的配置目的与结果都是生成一个 .config 文件，看看 .config 都有什么东西？<br>随便截取一段出来看看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Ethernet (10 or 100Mbit)</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">CONFIG_NET_ETHERNET=y</span><br><span class="line">CONFIG_MII=y</span><br><span class="line"><span class="comment"># CONFIG_SMC91X is not set</span></span><br><span class="line">CONFIG_DM9000=y</span><br><span class="line"><span class="comment"># CONFIG_CS89x0 is not set</span></span><br></pre></td></tr></table></figure>
+<p>不难看出 .config 文件中其实就是很多配置项，可以配置为 y、m 和数值，甚至有很多的配置项被注释掉了，后面跟着 is not set 字符串。<br>为什么 is not set 格式还有必须要注释？这样约定格式有什么意义？</p>
+<p>… … 待补充</p>
+<h3 id="1-4-开始编译内核"><a href="#1-4-开始编译内核" class="headerlink" title="1.4 开始编译内核"></a>1.4 开始编译内核</h3><p>直接 make 就可以执行编译的过程了，将会在 arch/arm/boot/zImage。但实际编译过程可能由于使用的交叉编译器工具链的区别会出现一些错误，请自行百度解决。<br>或者使用 make uImage 编译生成 uImage，那么什么是 uImage？<br>zImage 是 ARM Linux 常用的一种压缩映像文件，而 uImage 是 U-boot 专用的映像文件，它是在 zImage 之前加上一个长度为 0x40 的”头部”，说明这个映像文件的类型、加载位置、生成时间、大小等信息。换句话说，如果直接从 uImage 的 0x40 位置开始执行，zImage 和 uImage没有任何区别。<br>另外，Linux2.4 内核不支持 uImage，Linux2.6 内核加入了很多对嵌入式系统的支持，uImage 在 u-boot 里用 bootm 加载，而 zImage 用 go 加载。</p>
+<h2 id="二-内核实现剪裁的方式？"><a href="#二-内核实现剪裁的方式？" class="headerlink" title="二. 内核实现剪裁的方式？"></a>二. 内核实现剪裁的方式？</h2><h3 id="2-1-追踪分析-CONFIG-DM9000-配置项"><a href="#2-1-追踪分析-CONFIG-DM9000-配置项" class="headerlink" title="2.1 追踪分析 CONFIG_DM9000 配置项"></a>2.1 追踪分析 CONFIG_DM9000 配置项</h3><p>我们都知道 Linux 是一个可剪裁的内核，内核具备哪些功能，我们可以手动配置，而配置内核我们之前已经了解过了，通过三种方式，最终通过 .config 文件确认内核具备哪些功能。<br>我们以 CONFIG_DM9000 为例，看看内核是如何通过 .config 实现功能剪裁的。在 kernel 中 grep 搜索一下，看看 CONFIG_DM9000 这个宏出现在哪些文件中。</p>
+<p>我们给出现 CONFIG_DM9000 宏的文件分个类，大概有此 4 类：</p>
+<ul>
+<li>C 语言源码</li>
+<li>子目录的 Makefile</li>
+<li>include/config/auto.conf</li>
+<li>include/linux/autoconf.h  </li>
+</ul>
+<p>源码中使用到的宏定义只能是定义在 c 文件或者头文件中的，那很显然，源码中使用的宏定义就是在 include/linux/autoconf.h 文件中定义的。<br>看看这个文件的内容，仍然以 CONFIG_DM9000 为例，截取一部分看看：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_DM9000 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_SOLARIS_X86_PARTITION 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CONFIG_SERIAL_NONSTANDARD 1</span></span><br></pre></td></tr></table></figure>
+<p>如果你仔细的对比 .config 和 autoconf.h 文件，很容易发现这个规律：</p>
+<ul>
+<li>配置为 y 的选项，在 autoconf.h 文件中被定义成为了一个值为 1 的宏。</li>
+<li>配置为 m 的选项，在 autoconf.h 文件中没有被定义为宏。</li>
+<li>配置为数值的选项，在 autoconf.h 文件中被定义成为了一个值为对应数值的宏。</li>
+</ul>
+<p>接下来我们看看字目录下的 Makefile，在此此前先插播一下子目录的 makefile 的规则。<br>子目录下的 Makefile 通常都是将源文件加入到编译命令中。一般的格式是这样的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">obj-y += yyy.o   # 静态方式编译进内核</span><br><span class="line">obj-m += mmm.o   # 模块方式编译进内核</span><br></pre></td></tr></table></figure>
+<p>因此，子目录的 Makefile 多半是这样的(继续以 CONFIG_DM9000 为例)：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">obj-$(CONFIG_DM9000) += dm9dev9000c.o</span><br></pre></td></tr></table></figure>
+<p>很显然，子目录的 Makefile 是使用了 CONFIG_DM9000 变量，那 CONFIG_DM9000 变量是在哪里定义的呢？<br>看来看去也就只能是在 include/config/auto.conf 文件定义了，但是 Makefile 中只能引用 Makefile 中定义的变量，这个 auto.conf 又是什么东西？子目录中如果真的引用了 auto.conf 文件的内容，那就只有一种可能，某个 Makefile 将 auto.conf 文件包含进 Makefile 中了。<br>没错，还真的是这样，看看顶层 Makefile：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-include include/config/auto.conf</span><br></pre></td></tr></table></figure>
+<p>这里尝试包含 auto.conf 文件。由于使用 -include 进行声明，所以即使这两个文件不存在也不会报错退出。</p>
+<h3 id="2-2-必要的总结一下"><a href="#2-2-必要的总结一下" class="headerlink" title="2.2 必要的总结一下"></a>2.2 必要的总结一下</h3><p>配置的目的只有一个，根据我们想要内核具备的功能，通过配置项的方式，配置好并保存在 .config 文件中。<br>而在编译的时候，会自动的创建 auto.conf 和 autoconf.h 两个文件，一个在源码中作为宏控开关量，控制着哪些代码被编译；一个在 Makefile 控制做为宏控开关量，控制着哪些文件被编译进内核。</p>
+<h2 id="三-内核从哪里开始执行"><a href="#三-内核从哪里开始执行" class="headerlink" title="三. 内核从哪里开始执行"></a>三. 内核从哪里开始执行</h2><p>从 Makefile 开始分析，在顶层 Makefile 里面看看 make uImage 和 make 的过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># make uImage</span><br><span class="line">zImage Image xipImage bootpImage uImage: vmlinux</span><br><span class="line"></span><br><span class="line"># make</span><br><span class="line">all: vmlinux</span><br></pre></td></tr></table></figure>
+<p>可以发现都是依赖 vmlinux，接下来再看看 vmlinux 依赖些什么？</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">vmlinux: $(vmlinux-lds) $(vmlinux-init) $(vmlinux-main) $(kallsyms.o) FORCE</span><br><span class="line"></span><br><span class="line">vmlinux-init := $(head-y) $(init-y)</span><br><span class="line"></span><br><span class="line">head-y		:= arch/arm/kernel/head.o arch/arm/kernel/init_task.o</span><br><span class="line"></span><br><span class="line">init-y		:= init/</span><br><span class="line">init-y		:= $(patsubst %/, %/built-in.o, $(init-y))</span><br><span class="line">最后会将 init 目录下的所有文件编译成为一个 init/built-in.o</span><br><span class="line"></span><br><span class="line">vmlinux-main := $(core-y) $(libs-y) $(drivers-y) $(net-y)</span><br><span class="line">core-y		:= usr/</span><br><span class="line">core-y		+= kernel/ mm/ fs/ ipc/ security/ crypto/ block/</span><br><span class="line">core-y		:= $(patsubst %/, %/built-in.o, $(core-y))</span><br><span class="line">最后编译结果为 usr/built-in.o kernel/built-in.o mm/built-in.o fs/built-in.o ipc/built-in.o security/built-in.o crypto/built-in.o block/built-in.o</span><br><span class="line"></span><br><span class="line">libs-y		:= lib/</span><br><span class="line">libs-y		:= arch/arm/lib/ $(libs-y)</span><br><span class="line">libs-y		:= $(libs-y1) $(libs-y2)</span><br><span class="line">libs-y1		:= $(patsubst %/, %/lib.a, $(libs-y))</span><br><span class="line">libs-y2		:= $(patsubst %/, %/built-in.o, $(libs-y)</span><br><span class="line">最后编译结果为 lib/lib.a lib/built-in.o</span><br><span class="line"></span><br><span class="line">drivers-y	:= drivers/ sound/</span><br><span class="line">drivers-y	:= $(patsubst %/, %/built-in.o, $(drivers-y)</span><br><span class="line">最后编译结果为 drivers/built-in.o sound/built-in.o</span><br><span class="line"></span><br><span class="line">net-y		:= net/</span><br><span class="line">net-y		:= $(patsubst %/, %/built-in.o, $(net-y))</span><br><span class="line">最后编译结果为 net/built-in.o</span><br><span class="line"></span><br><span class="line">vmlinux-lds  := arch/$(ARCH)/kernel/vmlinux.lds</span><br><span class="line">链接脚本位置</span><br></pre></td></tr></table></figure>
+<p>可以看出，vmlinux 将内核中的各个目录下编译出来的 .o 文件分成了几大类，最终几乎将所有的代码包含在 vmlinux 中。<br>Make 追踪下来回比较麻烦，其实还有更简单粗暴的方法，直接根据 make 命令的控制台输出确认。<br>通过在 make uImage 命令加一个 V=1 的属性值打印更详细的 log 信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">user@vmware:~/workspace/jz2440/linux-2.6.22.6$ rm -rf vmlinux</span><br><span class="line">user@vmware:~/workspace/jz2440/linux-2.6.22.6$ make uImage V=1</span><br><span class="line">  arm-linux-ld -EL  -p --no-undefined -X -o vmlinux -T arch/arm/kernel/vmlinux.lds arch/arm/kernel/head.o arch/arm/kernel/init_task.o init/built-in.o --start-group usr/built-in.o arch/arm/kernel/built-in.o arch/arm/mm/built-in.o arch/arm/common/built-in.o arch/arm/mach-s3c2410/built-in.o arch/arm/mach-s3c2400/built-in.o arch/arm/mach-s3c2412/built-in.o arch/arm/mach-s3c2440/built-in.o arch/arm/mach-s3c2442/built-in.o arch/arm/mach-s3c2443/built-in.o arch/arm/nwfpe/built-in.o arch/arm/plat-s3c24xx/built-in.o kernel/built-in.o mm/built-in.o fs/built-in.o ipc/built-in.o security/built-in.o crypto/built-in.o block/built-in.o arch/arm/lib/lib.a lib/lib.a arch/arm/lib/built-in.o lib/built-in.o drivers/built-in.o sound/built-in.o net/built-in.o --end-group .tmp_kallsyms2.o</span><br></pre></td></tr></table></figure>
+<p>最关键的一句，我没有分行，建议复制出来看看，和我们之前分析 Makefile 得出的结论是一致的。</p>
+<p>通过上面的分析，得出两个结论：</p>
+<ol>
+<li>最先执行文件：arch/arm/kernel/head.S</li>
+<li>内核链接脚本：arch/arm/kernel/vmlinux.lds</li>
+</ol>
+<h2 id="四-分析内核启动过程"><a href="#四-分析内核启动过程" class="headerlink" title="四. 分析内核启动过程"></a>四. 分析内核启动过程</h2><h3 id="4-1-建立-source-insight-工程"><a href="#4-1-建立-source-insight-工程" class="headerlink" title="4.1 建立 source insight 工程"></a>4.1 建立 source insight 工程</h3><ol>
+<li>添加所有文件  </li>
+<li>删除 arch 目录  </li>
+<li>添加公用的代码<br>arch/arm/boot/<br>arch/arm/common/<br>arch/arm/configs/<br>arch/arm/kernel/<br>arch/arm/lib/<br>arch/arm/mach-s3c2410/<br>arch/arm/mach-s3c2440/<br>arch/arm/mm/<br>arch/arm/nwfpe/<br>arch/arm/oprofile/<br>arch/arm/plat-s3c24xx/<br>arch/arm/tools/<br>arch/arm/vfp/  </li>
+<li>删除 include 目录  </li>
+<li>添加非 asm 开头的目录<br>include/acpi/<br>include/config/<br>include/crypto/<br>include/Kbuild<br>include/keys/<br>include/linux/<br>include/math-emu/<br>include/media/<br>include/mtd/<br>include/net/<br>include/pcmcia/<br>include/rdma/<br>include/rxrpc/<br>include/scsi/<br>include/sound/<br>include/video/  </li>
+<li>添加 include/asm-arm/ 目录下的文件(目录不添加)  </li>
+<li>添加 include/asm-arm/ 目录下的目录<br>include/asm-arm/arch-s3c2410/<br>include/asm-arm/hardware/<br>include/asm-arm/plat-s3c24xx/<br>include/asm-arm/mach/  </li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/maziot/weixin.png" alt="Paul Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/maziot/alipay.png" alt="Paul Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/boot/" rel="tag"># boot</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/05/odm-add-file-to-system-partition/" rel="next" title="[ODM] 在 system 只读分区新增 shell 脚本">
+                <i class="fa fa-chevron-left"></i> [ODM] 在 system 只读分区新增 shell 脚本
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/18/odm-power-key-can-not-close-screen/" rel="prev" title="[ODM] 客退按电源键无法熄屏">
+                [ODM] 客退按电源键无法熄屏 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/maziot/avatar.jpg" alt="Paul Wang">
+            
+              <p class="site-author-name" itemprop="name">Paul Wang</p>
+              <p class="site-description motion-element" itemprop="description">但行好事 莫问前程</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:mz8023yt@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/mz8023yt" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/30fc01f695b9" target="_blank" title="Jianshu"><i class="fa fa-fw fa-book"></i>Jianshu</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://mipi.org/" title="mipi" target="_blank">mipi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://git-scm.com/" title="git" target="_blank">git</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hexo.io/" title="hexo" target="_blank">hexo</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com/" title="next" target="_blank">next</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ezgif.com/" title="gif" target="_blank">gif</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fontawesome.dashgame.com/" title="font" target="_blank">font</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kernel.org/" title="kernel" target="_blank">kernel</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一-内核编译初体验"><span class="nav-text">一. 内核编译初体验</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-获取-Linux-内核"><span class="nav-text">1.1 获取 Linux 内核</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-解压内核并给内核打补丁"><span class="nav-text">1.2 解压内核并给内核打补丁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-配置内核"><span class="nav-text">1.3 配置内核</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#方式一：通过-menu-菜单直接配置"><span class="nav-text">方式一：通过 menu 菜单直接配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方式二：使用默认配置文件配置，默认配置的文件位于：arch-arm-configs。"><span class="nav-text">方式二：使用默认配置文件配置，默认配置的文件位于：arch/arm/configs。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方式三：使用厂家提供的配置文件配置。"><span class="nav-text">方式三：使用厂家提供的配置文件配置。</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-开始编译内核"><span class="nav-text">1.4 开始编译内核</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-内核实现剪裁的方式？"><span class="nav-text">二. 内核实现剪裁的方式？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-追踪分析-CONFIG-DM9000-配置项"><span class="nav-text">2.1 追踪分析 CONFIG_DM9000 配置项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-必要的总结一下"><span class="nav-text">2.2 必要的总结一下</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三-内核从哪里开始执行"><span class="nav-text">三. 内核从哪里开始执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四-分析内核启动过程"><span class="nav-text">四. 分析内核启动过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-建立-source-insight-工程"><span class="nav-text">4.1 建立 source insight 工程</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Paul Wang</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">309k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">4:false</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'mz8023yt',
+            repo: 'blog.comments',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '41b269fc8cc71a77e91b3485769b325e249b15dd',
+            
+                client_id: '3b0f546a740181c255a9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('3');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

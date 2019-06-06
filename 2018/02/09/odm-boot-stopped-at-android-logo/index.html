@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/maziot/maziot-apple.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/maziot/maziot-32x32.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/maziot/maziot-16x16.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/maziot/maziot.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="问题描述最近做的一个 MTK 平台的项目客退一台手机，不良现象为: 开机卡死在 android logo 界面，无法正常进入系统。 背景知识android 手机开机一般都有三帧 boot logo，第一帧是 “Power by android”，第二帧一般是各个手机品牌商的品牌 logo，第三帧就是定制的开机动画了。此问题是没有跳转到第二帧，卡死在第一帧，所以关键看第一帧到第二帧期间哪里出了问题。">
+<meta name="keywords" content="boot,system,mtk">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[ODM] 开机卡死在 android logo 界面">
+<meta property="og:url" content="http://yoursite.com/2018/02/09/odm-boot-stopped-at-android-logo/index.html">
+<meta property="og:site_name" content="Paul&#39;s blog">
+<meta property="og:description" content="问题描述最近做的一个 MTK 平台的项目客退一台手机，不良现象为: 开机卡死在 android logo 界面，无法正常进入系统。 背景知识android 手机开机一般都有三帧 boot logo，第一帧是 “Power by android”，第二帧一般是各个手机品牌商的品牌 logo，第三帧就是定制的开机动画了。此问题是没有跳转到第二帧，卡死在第一帧，所以关键看第一帧到第二帧期间哪里出了问题。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-06-06T09:42:25.194Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[ODM] 开机卡死在 android logo 界面">
+<meta name="twitter:description" content="问题描述最近做的一个 MTK 平台的项目客退一台手机，不良现象为: 开机卡死在 android logo 界面，无法正常进入系统。 背景知识android 手机开机一般都有三帧 boot logo，第一帧是 “Power by android”，第二帧一般是各个手机品牌商的品牌 logo，第三帧就是定制的开机动画了。此问题是没有跳转到第二帧，卡死在第一帧，所以关键看第一帧到第二帧期间哪里出了问题。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/02/09/odm-boot-stopped-at-android-logo/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>[ODM] 开机卡死在 android logo 界面 | Paul's blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Paul's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">学而不思则罔 思而不学则殆</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-music">
+    <a href="/music/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-headphones"></i> <br>音乐</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/02/09/odm-boot-stopped-at-android-logo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Paul Wang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/maziot/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paul's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[ODM] 开机卡死在 android logo 界面
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-02-09 19:25:48" itemprop="dateCreated datePublished" datetime="2018-02-09T19:25:48+08:00">2018-02-09</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-06 17:42:25" itemprop="dateModified" datetime="2019-06-06T17:42:25+08:00">2019-06-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Experience/" itemprop="url" rel="index"><span itemprop="name">Experience</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/02/09/odm-boot-stopped-at-android-logo/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/02/09/odm-boot-stopped-at-android-logo/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">13k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">12 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><p>最近做的一个 MTK 平台的项目客退一台手机，不良现象为: 开机卡死在 android logo 界面，无法正常进入系统。</p>
+<h3 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h3><p>android 手机开机一般都有三帧 boot logo，第一帧是 “Power by android”，第二帧一般是各个手机品牌商的品牌 logo，第三帧就是定制的开机动画了。<br>此问题是没有跳转到第二帧，卡死在第一帧，所以关键看第一帧到第二帧期间哪里出了问题。</p>
+<p>贴出同事总结的 Android logo 加载流程:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br></pre></td><td class="code"><pre><span class="line">[第一张 logo 显示在 lk 启动流程中介绍]</span><br><span class="line">[第二张 logo 初始化显示位置]</span><br><span class="line">alps\device\mediatek\mt6755\init.mt6755.rc</span><br><span class="line"># Update the second boot logo</span><br><span class="line">service bootlogoupdater /vendor/bin/boot_logo_updater</span><br><span class="line">        <span class="class"><span class="keyword">class</span> <span class="title">core</span></span></span><br><span class="line"><span class="class">        <span class="title">oneshot</span></span></span><br><span class="line"><span class="class">    </span></span><br><span class="line"><span class="class">// <span class="title">vendor</span>\<span class="title">mediatek</span>\<span class="title">proprietary</span>\<span class="title">external</span>\<span class="title">boot_logo_updater</span>\<span class="title">boot_logo_updater</span>.<span class="title">c</span></span></span><br><span class="line"><span class="class"><span class="title">main</span>(<span class="title">void</span>)</span></span><br><span class="line"><span class="class">        // 获得启动模式，即启动的原因，并设置相应的属性节点值</span></span><br><span class="line"><span class="class">        <span class="title">int</span> <span class="title">ret</span> = <span class="title">update_boot_reason</span>();</span></span><br><span class="line">                fd = open(BOOT_MODE_PATH, O_RDWR);                      <span class="comment">// /sys/class/BOOT/BOOT/boot/boot_mode</span></span><br><span class="line">                s = read(fd, (<span class="keyword">void</span> *)&amp;boot_mode, <span class="keyword">sizeof</span>(boot_mode));</span><br><span class="line">                property_get(BOOT_PACKAGE_SYS_PROPERTY, propVal, <span class="string">"0"</span>);  <span class="comment">// sys.boot.reason"</span></span><br><span class="line">                property_set(BOOT_REASON_SYS_PROPERTY, propVal);        <span class="comment">// persist.sys.bootpackage</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 设置背光亮度</span></span><br><span class="line">        set_int_value(LCD_BACKLIGHT_PATH, <span class="number">120</span>);                         <span class="comment">// /sys/class/leds/lcd-backlight/brightness</span></span><br><span class="line">                write_to_file(path, buf, <span class="built_in">strlen</span>(buf));    </span><br><span class="line">                        <span class="keyword">int</span> fd = open(path, O_RDWR);</span><br><span class="line">                        <span class="keyword">int</span> count = write(fd, buf, size);</span><br><span class="line">                        close(fd);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 都不在文件中了：查看 Android.mk </span></span><br><span class="line">        <span class="comment">// LOCAL_C_INCLUDES += $(LOCAL_PATH)/../libshowlogo/</span></span><br><span class="line">        <span class="comment">// 最终此文件中找到了对应的函数实现，代码路径为：</span></span><br><span class="line">        <span class="comment">// vendor\mediatek\proprietary\external\libshowlogo</span></span><br><span class="line">        set_draw_mode(DRAW_ANIM_MODE_FB);</span><br><span class="line">                <span class="comment">//Charging_animation.cpp</span></span><br><span class="line">                set_draw_mode(<span class="keyword">int</span> draw_mode)</span><br><span class="line">                        <span class="comment">// 设置显示模式全局变量，有两种显示模式</span></span><br><span class="line">                        <span class="comment">// #define DRAW_ANIM_MODE_FB       1</span></span><br><span class="line">                        <span class="comment">// #define DRAW_ANIM_MODE_SURFACE  0</span></span><br><span class="line">                        draw_anim_mode = draw_mode;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 获得对应平台的 fstab 文件，获得 logo.img 挂载位置，然后读取 logo </span></span><br><span class="line">        <span class="comment">// 然后初始化显示设备，有两种显示方式：</span></span><br><span class="line">        <span class="comment">//   1. 直接在 fb 内核中显示</span></span><br><span class="line">        <span class="comment">//   2. 在 surface 中显示 </span></span><br><span class="line">        anim_init();</span><br><span class="line">                <span class="comment">//Charging_animation.cpp            </span></span><br><span class="line">                anim_init()</span><br><span class="line">                        <span class="comment">// 获得对应平台的 fstab 文件，然后获得其挂载分区 /logo </span></span><br><span class="line">                        <span class="comment">// 读取对应的 logo 镜像文件</span></span><br><span class="line">                        anim_logo_init();</span><br><span class="line">                                <span class="keyword">int</span> ret = property_get(<span class="string">"ro.hardware"</span>, propbuf, <span class="string">""</span>);</span><br><span class="line">                                <span class="built_in">snprintf</span>(fstab_filename, <span class="keyword">sizeof</span>(fstab_filename), FSTAB_PREFIX<span class="string">"%s"</span>, propbuf);</span><br><span class="line">                                fstab = fs_mgr_read_fstab(fstab_filename);</span><br><span class="line">                                rec = fs_mgr_get_entry_for_mount_point(fstab, LOGO_MNT_POINT);</span><br><span class="line">                                fd = open(rec-&gt;blk_device, O_RDONLY);</span><br><span class="line">                                logo_addr = (<span class="keyword">unsigned</span> <span class="keyword">int</span>*)<span class="built_in">malloc</span>(LOGO_BUFFER_SIZE);</span><br><span class="line">                                <span class="comment">// (1) skip the image header</span></span><br><span class="line">                                len = read(fd, logo_addr, <span class="number">512</span>);</span><br><span class="line">                                <span class="comment">// get the image</span></span><br><span class="line">                                len = read(fd, logo_addr, LOGO_BUFFER_SIZE - <span class="number">512</span>);</span><br><span class="line">                                close(fd);</span><br><span class="line">    </span><br><span class="line">                        <span class="comment">// 1. 在 fb 中显示 logo                </span></span><br><span class="line">                        <span class="keyword">if</span> (draw_anim_mode == (DRAW_ANIM_MODE_FB)) &#123;</span><br><span class="line">                                anim_fb_init();</span><br><span class="line">                                    <span class="comment">// 打开 fb0, </span></span><br><span class="line">                                    fb_fd = open(FB_NODE_PATH, O_RDWR);</span><br><span class="line">                                    </span><br><span class="line">                                    <span class="comment">// 获得屏相关的信息参数</span></span><br><span class="line">                                    ioctl(fb_fd, FBIOGET_VSCREENINFO, &amp;vinfo);</span><br><span class="line">                                    ioctl(fb_fd, FBIOGET_FSCREENINFO, &amp;finfo);</span><br><span class="line">                                    </span><br><span class="line">                                    <span class="comment">// 将显示屏映射到进程的地址空间中</span></span><br><span class="line">                                    fb_size  = finfo.line_length * vinfo.yres;</span><br><span class="line">                                    dec_logo_addr = (<span class="keyword">unsigned</span> <span class="keyword">int</span>*) <span class="built_in">malloc</span>(fb_size);</span><br><span class="line">                                    lk_fb_addr =(<span class="keyword">unsigned</span> <span class="keyword">int</span>*)mmap(<span class="number">0</span>, fb_size*<span class="number">3</span>, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, <span class="number">0</span>);</span><br><span class="line">                                    charging_fb_addr = (<span class="keyword">unsigned</span> <span class="keyword">int</span>*)((<span class="keyword">unsigned</span> <span class="keyword">int</span>)lk_fb_addr + fb_size);</span><br><span class="line">                                    kernel_fb_addr = (<span class="keyword">unsigned</span> <span class="keyword">int</span>*)((<span class="keyword">unsigned</span> <span class="keyword">int</span>)charging_fb_addr + fb_size);</span><br><span class="line">                                    fb_addr = lk_fb_addr;</span><br><span class="line">                                    </span><br><span class="line">                                    <span class="comment">// 设置本地的屏的相关参数</span></span><br><span class="line">                                    phical_screen.bits_per_pixel = vinfo.bits_per_pixel;</span><br><span class="line">                                    phical_screen.fill_dst_bits = vinfo.bits_per_pixel;</span><br><span class="line">                                    phical_screen.red_offset = vinfo.red.offset;</span><br><span class="line">                                    phical_screen.blue_offset = vinfo.blue.offset;</span><br><span class="line">                                    phical_screen.width = vinfo.xres;</span><br><span class="line">                                    phical_screen.height = vinfo.yres;</span><br><span class="line">                                    phical_screen.allignWidth = finfo.line_length/(vinfo.bits_per_pixel/<span class="number">8</span>);</span><br><span class="line">                                    phical_screen.needAllign = <span class="number">1</span>;</span><br><span class="line">                                    phical_screen.need180Adjust = <span class="number">1</span>;</span><br><span class="line">                                    phical_screen.fb_size = fb_size;</span><br><span class="line">                                    </span><br><span class="line">                                    <span class="comment">// 设置旋转参数</span></span><br><span class="line">                                    <span class="keyword">if</span>(<span class="number">0</span> == <span class="built_in">strncmp</span>(MTK_LCM_PHYSICAL_ROTATION, <span class="string">"270"</span>, <span class="number">3</span>))</span><br><span class="line">                                        。。。</span><br><span class="line">                                        phical_screen.rotation = <span class="number">270</span>;</span><br><span class="line">                                    </span><br><span class="line">                        <span class="comment">// 2. 在 surface 中显示 logo 初始化</span></span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            anim_surface_init();</span><br><span class="line">                                    surfaceControl = client-&gt;createSurface(String8(<span class="string">"charging-surface"</span>), dinfo_width,  dinfo_height, PIXEL_FORMAT_BGRA_8888);</span><br><span class="line">                                    SurfaceComposerClient::openGlobalTransaction();</span><br><span class="line">                                    surfaceControl-&gt;setLayer(<span class="number">2000000</span>);</span><br><span class="line">                                    SurfaceComposerClient::closeGlobalTransaction();</span><br><span class="line">                                    </span><br><span class="line">                                    <span class="comment">// data structure to access surface content</span></span><br><span class="line">                                    surface = surfaceControl-&gt;getSurface();</span><br><span class="line">                                    phical_screen.width = dinfo.w;</span><br><span class="line">                                    phical_screen.height = dinfo.h;</span><br><span class="line">                                    </span><br><span class="line">                                    <span class="comment">// for we adjust the roration avove, so no need to consider rotation</span></span><br><span class="line">                                    phical_screen.rotation = <span class="number">0</span>;</span><br><span class="line">                                    phical_screen.need180Adjust = <span class="number">0</span>;</span><br><span class="line">                                                                    </span><br><span class="line">                                    ANativeWindow* window = surface.get();</span><br><span class="line">                                    <span class="keyword">status_t</span> result = native_window_api_connect(window, NATIVE_WINDOW_API_CPU);</span><br><span class="line">                                    err = window-&gt;dequeueBuffer(window, &amp;buf, &amp;fenceFd);</span><br><span class="line">                                    sp&lt;Fence&gt; mFence(<span class="keyword">new</span> Fence(fenceFd));</span><br><span class="line">                                    mFence-&gt;wait(Fence::TIMEOUT_NEVER);</span><br><span class="line">                                    gb = <span class="keyword">new</span> GraphicBuffer(buf, <span class="literal">false</span>);</span><br><span class="line">                                    phical_screen.needAllign = <span class="number">1</span>;</span><br><span class="line">                                    phical_screen.allignWidth = gb-&gt;getStride();</span><br><span class="line">                                    window-&gt;cancelBuffer(window, buf, fenceFd);</span><br><span class="line">                                    <span class="comment">// use PIXEL_FORMAT_RGBA_8888 for surface flinger</span></span><br><span class="line">                                    phical_screen.bits_per_pixel = <span class="number">32</span>;</span><br><span class="line">                                    phical_screen.fill_dst_bits = <span class="number">32</span>;</span><br><span class="line">                                    fb_size  = dinfo.w * dinfo.h* <span class="number">4</span>;</span><br><span class="line">                                    dec_logo_addr = <span class="built_in">malloc</span>(fb_size);</span><br><span class="line">                                    phical_screen.fb_size = fb_size;</span><br><span class="line">                                                                </span><br><span class="line">                        &#125;</span><br><span class="line">                    </span><br><span class="line">        <span class="comment">// 显示 logo, 其实就是</span></span><br><span class="line">        <span class="comment">//      1. 从 logo.img 中读出对应的 logo </span></span><br><span class="line">        <span class="comment">//      2. 将 logo 填充到显示缓冲区中即可</span></span><br><span class="line">        show_kernel_logo();</span><br><span class="line">                anim_show_logo(kernel_logo_position);       <span class="comment">// 此参数为 kernel logo 在 logo.img 中的 index  ，static int kernel_logo_position = KERNEL_LOGO_INDEX ;</span></span><br><span class="line">                        <span class="keyword">if</span> (draw_anim_mode == (DRAW_ANIM_MODE_FB)) &#123;</span><br><span class="line">                            anim_set_buffer_address(index);</span><br><span class="line">                            fill_animation_logo(index, fb_addr, dec_logo_addr, logo_addr,phical_screen);        <span class="comment">// 显示图片</span></span><br><span class="line">                            anim_fb_disp_update();</span><br><span class="line">                         &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            ARect tmpRect;</span><br><span class="line">                            tmpRect.left = <span class="number">0</span>;</span><br><span class="line">                            tmpRect.top = <span class="number">0</span>;</span><br><span class="line">                            tmpRect.right = phical_screen.width;</span><br><span class="line">                            tmpRect.bottom = phical_screen.height;</span><br><span class="line"></span><br><span class="line">                            <span class="keyword">status_t</span>  lockResult = surface-&gt;lock(&amp;outBuffer, &amp;tmpRect);</span><br><span class="line"></span><br><span class="line">                            SLOGD(<span class="string">"[libshowlogo: %s %d]outBuffer.bits = %d\n"</span>,__FUNCTION__,__LINE__, (<span class="keyword">int</span>)outBuffer.bits);</span><br><span class="line">                            SLOGD(<span class="string">"[libshowlogo: %s %d]surface-&gt;lock return =  0x%08x,  %d\n"</span>,__FUNCTION__,__LINE__,lockResult,lockResult);</span><br><span class="line">                            <span class="keyword">if</span> (<span class="number">0</span> == lockResult)</span><br><span class="line">                            &#123;</span><br><span class="line">                                fill_animation_logo(index, (<span class="keyword">void</span> *)outBuffer.bits, dec_logo_addr, logo_addr,phical_screen);<span class="comment">// 显示图片</span></span><br><span class="line">                                surface-&gt;unlockAndPost();</span><br><span class="line">                            &#125;</span><br><span class="line">                         &#125;</span><br><span class="line">        <span class="comment">// 相关资源的释放        </span></span><br><span class="line">        anim_deinit();   </span><br><span class="line">                anim_logo_deinit();</span><br><span class="line">                        free_fstab();</span><br><span class="line">                        <span class="built_in">free</span>(logo_addr);</span><br><span class="line">                        logo_addr = <span class="literal">NULL</span>;</span><br><span class="line">                        <span class="built_in">free</span>(dec_logo_addr);</span><br><span class="line">                <span class="keyword">if</span> (draw_anim_mode == (DRAW_ANIM_MODE_FB)) &#123;</span><br><span class="line">                    anim_fb_deinit();</span><br><span class="line">                        munmap(lk_fb_addr, fb_size*<span class="number">3</span>);</span><br><span class="line">                        close(fb_fd);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    anim_surface_deinit();</span><br><span class="line">                            surface = surfaceControl-&gt;getSurface();</span><br><span class="line">                            ANativeWindow* window = surface.get();</span><br><span class="line">                            native_window_api_disconnect(window,NATIVE_WINDOW_API_CPU);</span><br><span class="line">                            surfaceControl-&gt;clear();</span><br><span class="line">                            client-&gt;dispose();</span><br><span class="line">                &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="分析思路"><a href="#分析思路" class="headerlink" title="分析思路"></a>分析思路</h3><p>(1) 先回读镜像，回读了 pl lk boot(但不知道手机的软件版本)，通过和正式版本的镜像对比，发现回读的镜像和 WW B18 一致，确认到手机软件版本为 WW B18。<br>(2) 和 WW B18 的镜像对比，发现 pl lk boot 镜像和版本中的镜像一致，没有损坏。<br>(3) 焊接串口，抓取串口 log，通过 fastboot 在 user 版本下抓取完整的开机 uart log。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\wangbing&gt;fastboot oem p2u on</span><br><span class="line">C:\Users\wangbing&gt;fastboot continue</span><br></pre></td></tr></table></figure>
+<p>(4) 对比不良机和正常机开机串口 log，发现，不良机在 init 进程中找不到 boot_logo_updater，没有正常启动 boot_logo_updater 程序(此服务用于加载 kernel 阶段的 boot logo，对应开机的客户品牌 logo 图片)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[    5.119985] &lt;5&gt;.(5)[1:init]init: Starting service &apos;healthd&apos;...</span><br><span class="line">[    5.121544] &lt;5&gt;.(5)[1:init]init: cannot find &apos;/vendor/bin/boot_logo_updater&apos; (No such file or directory), disabling &apos;bootlogoupdater&apos;</span><br><span class="line">[    5.123102] &lt;5&gt;.(5)[1:init]init: cannot find &apos;/vendor/bin/wmt_loader&apos; (No such file or directory), disabling &apos;wmt_loader&apos;</span><br><span class="line">[    5.124484] &lt;5&gt;.(5)[1:init]init: cannot find &apos;/vendor/bin/wmt_launcher&apos; (No such file or directory), disabling &apos;wmt_launcher&apos;</span><br><span class="line">[    5.125082] &lt;5&gt;.(4)[314:healthd]binder: 314:314 binder_context_mgr_node is NULL</span><br><span class="line">[    5.125087] &lt;5&gt;.(4)[314:healthd]binder: 314:314 transaction failed 29189, size 0-0</span><br><span class="line">[    5.125094] &lt;5&gt;.(4)[314&apos;(ndor/bin/ccci_mdinit&apos; (No such file or directory), disabling &apos;ccci_mdinit&apos;</span><br><span class="line">[    5.133184] &lt;5&gt;.(5)[1:init]init: cannot find &apos;/vendor/bin/ccci_fsd&apos; (No such file or directory), disabling &apos;ccci3_fsd&apos;</span><br><span class="line">[    5.134526] &lt;5&gt;.(5)[1:init]init: cannot find &apos;/vendor/bin/ccci_mdinit&apos; (No such file or directory), disabling &apos;ccci3_mdinit&apos;</span><br><span class="line">[    5.135973] &lt;5&gt;.(5)[1:init]init: cannot find &apos;/vendor/bin/ccci_rpcd&apos; (No such file or directory), disabling &apos;ccci_rpcd&apos;</span><br><span class="line">[    5.137324] &lt;5&gt;.(5)[1:init]init: cannot find &apos;/vendor/bin/terservice&apos; (No such file or directory), disabling &apos;terservice&apos;</span><br></pre></td></tr></table></figure>
+<p>(5) boot_logo_updater 服务编译版本后会打包在 /system/vendor/bin 目录下，而 /vendor/bin/ 是通过软链接方式链接到 /system/vendor/bin 目录的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\wangbing&gt;adb shell</span><br><span class="line">android:/ # ls -l vendor</span><br><span class="line">lrwxrwxrwx 1 root root 14 1970-01-01 08:00 vendor -&gt; /system/vendor</span><br></pre></td></tr></table></figure>
+<p>(6) boot_logo_update 程序打不开，有两个怀疑点，要么是 /system/vendor/bin 目录下的执行文件有问题，要么是从 /vendor/ 到 /system/vendor/ 的软链接没有生效。<br>(7) 试图连接下 adb，想确认下软连接有没有生效，很遗憾，无法连接。<br>(8) 回读不良机的 system 镜像，使用 ext2explore.exe 解压确认，发现不良原因确实是 boot_logo_updater 损坏，导致无法加载第二帧 logo。</p>
+<h3 id="分析结论"><a href="#分析结论" class="headerlink" title="分析结论"></a>分析结论</h3><p>客退机 system 分区损坏，导致无法加载 boot_logo_updater 程序引导第二帧 boot logo；同时 init 进程无法成功执行，导致无法开机。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/maziot/weixin.png" alt="Paul Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/maziot/alipay.png" alt="Paul Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/boot/" rel="tag"># boot</a>
+          
+            <a href="/tags/system/" rel="tag"># system</a>
+          
+            <a href="/tags/mtk/" rel="tag"># mtk</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/27/protocol-mipi-eliminate-illiteracy/" rel="next" title="[Protocol] MIPI 协议扫盲">
+                <i class="fa fa-chevron-left"></i> [Protocol] MIPI 协议扫盲
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/26/odm-dynamic-control-LTE-CA-band/" rel="prev" title="[ODM] 动态开启关闭 LTE CA band">
+                [ODM] 动态开启关闭 LTE CA band <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/maziot/avatar.jpg" alt="Paul Wang">
+            
+              <p class="site-author-name" itemprop="name">Paul Wang</p>
+              <p class="site-description motion-element" itemprop="description">但行好事 莫问前程</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:mz8023yt@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/mz8023yt" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/30fc01f695b9" target="_blank" title="Jianshu"><i class="fa fa-fw fa-book"></i>Jianshu</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://mipi.org/" title="mipi" target="_blank">mipi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://git-scm.com/" title="git" target="_blank">git</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hexo.io/" title="hexo" target="_blank">hexo</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com/" title="next" target="_blank">next</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ezgif.com/" title="gif" target="_blank">gif</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fontawesome.dashgame.com/" title="font" target="_blank">font</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kernel.org/" title="kernel" target="_blank">kernel</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题描述"><span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#背景知识"><span class="nav-text">背景知识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分析思路"><span class="nav-text">分析思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分析结论"><span class="nav-text">分析结论</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Paul Wang</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">309k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">4:false</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'mz8023yt',
+            repo: 'blog.comments',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '41b269fc8cc71a77e91b3485769b325e249b15dd',
+            
+                client_id: '3b0f546a740181c255a9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('3');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

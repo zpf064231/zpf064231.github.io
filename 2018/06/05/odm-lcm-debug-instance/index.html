@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/maziot/maziot-apple.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/maziot/maziot-32x32.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/maziot/maziot-16x16.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/maziot/maziot.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="实例1：闪屏问题问题描述工厂 OOB 测试先后测试出 3pcs 闪屏机器，不良现象为每隔 2s 左右规律性的出现一次黑屏，上海可生产测试出 1pcs 闪屏机器，不良现象和工厂不良一致 分析过程 分析工厂传回的 log不良现象为每隔 2s 黑屏一次，2s 的频率和 esd check 的频率一致，并且 esd recover 动作掉电确实会黑屏一次，重点怀疑 esd check 这块   [  59">
+<meta name="keywords" content="qcom,lcm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[ODM] LCM 相关 debug 实例">
+<meta property="og:url" content="http://yoursite.com/2018/06/05/odm-lcm-debug-instance/index.html">
+<meta property="og:site_name" content="Paul&#39;s blog">
+<meta property="og:description" content="实例1：闪屏问题问题描述工厂 OOB 测试先后测试出 3pcs 闪屏机器，不良现象为每隔 2s 左右规律性的出现一次黑屏，上海可生产测试出 1pcs 闪屏机器，不良现象和工厂不良一致 分析过程 分析工厂传回的 log不良现象为每隔 2s 黑屏一次，2s 的频率和 esd check 的频率一致，并且 esd recover 动作掉电确实会黑屏一次，重点怀疑 esd check 这块   [  59">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-01.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-02.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-03.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-05.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-04.png">
+<meta property="og:updated_time" content="2019-06-06T09:42:25.196Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[ODM] LCM 相关 debug 实例">
+<meta name="twitter:description" content="实例1：闪屏问题问题描述工厂 OOB 测试先后测试出 3pcs 闪屏机器，不良现象为每隔 2s 左右规律性的出现一次黑屏，上海可生产测试出 1pcs 闪屏机器，不良现象和工厂不良一致 分析过程 分析工厂传回的 log不良现象为每隔 2s 黑屏一次，2s 的频率和 esd check 的频率一致，并且 esd recover 动作掉电确实会黑屏一次，重点怀疑 esd check 这块   [  59">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-01.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/06/05/odm-lcm-debug-instance/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>[ODM] LCM 相关 debug 实例 | Paul's blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Paul's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">学而不思则罔 思而不学则殆</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-music">
+    <a href="/music/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-headphones"></i> <br>音乐</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/05/odm-lcm-debug-instance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Paul Wang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/maziot/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paul's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[ODM] LCM 相关 debug 实例
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-06-05 13:08:56" itemprop="dateCreated datePublished" datetime="2018-06-05T13:08:56+08:00">2018-06-05</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-06 17:42:25" itemprop="dateModified" datetime="2019-06-06T17:42:25+08:00">2019-06-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Experience/" itemprop="url" rel="index"><span itemprop="name">Experience</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/05/odm-lcm-debug-instance/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/06/05/odm-lcm-debug-instance/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">4.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">4 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="实例1：闪屏问题"><a href="#实例1：闪屏问题" class="headerlink" title="实例1：闪屏问题"></a>实例1：闪屏问题</h3><h4 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h4><p>工厂 OOB 测试先后测试出 3pcs 闪屏机器，不良现象为每隔 2s 左右规律性的出现一次黑屏，上海可生产测试出 1pcs 闪屏机器，不良现象和工厂不良一致</p>
+<h4 id="分析过程"><a href="#分析过程" class="headerlink" title="分析过程"></a>分析过程</h4><ol>
+<li><p>分析工厂传回的 log<br>不良现象为每隔 2s 黑屏一次，2s 的频率和 esd check 的频率一致，并且 esd recover 动作掉电确实会黑屏一次，重点怀疑 esd check 这块  </p>
+<pre><code>[  590.217496] lcd esd return_buf[1] = 0x88  status_value = 0x80
+[  593.385461] lcd esd check failed mdss_check_dsi_ctrl_status 175
+[  595.897451] lcd esd return_buf[1] = 0x88  status_value = 0x80
+[  597.856254] lcd esd check failed mdss_check_dsi_ctrl_status 175
+[  600.125425] lcd esd return_buf[1] = 0x88  status_value = 0x80
+[  602.998541] lcd esd check failed mdss_check_dsi_ctrl_status 175
+[  604.342345] lcd esd return_buf[1] = 0x88  status_value = 0x80
+</code></pre><p>搜索 <code>lcd esd</code> 关键字，确认到，确实是 lcd esd check fail，触发 recover 动作(黑屏一次)，正常情况下，recover 动作执行完后，ic 状态应该恢复正常，再次 check 将会 pass，但是，通过 log 中看出，recover 动作后，esd check 仍旧 fail，说明 ic 状态还是异常，再次触发 recover(黑屏一次)，如此循环，出现闪屏</p>
+</li>
+<li><p>确认是哪一项 check failed<br>查看屏 dtsi 中 esd 相关的属性值，确认到是 09 寄存器第一个字节异常  </p>
+<pre><code>qcom,esd-check-enabled;
+
+/* 指定 esd check 的 command，cmd 最后一次字节是 check 的寄存器 */
+qcom,mdss-dsi-panel-status-command = [
+        14 01 00 01 05 00 01 68
+        06 01 00 01 05 00 01 09
+        14 01 00 01 05 00 01 CC
+        14 01 00 01 05 00 01 AF
+    ];
+qcom,mdss-dsi-panel-status-command-state = &quot;dsi_lp_mode&quot;;
+qcom,mdss-dsi-panel-status-check-mode = &quot;reg_read&quot;;
+
+/* 在 command 中指定指定过了 check 的寄存器，这里指定 check 对应寄存器的前几个字节 */
+qcom,mdss-dsi-panel-status-read-length = &lt;1 3 1 1&gt;;
+qcom,mdss-dsi-panel-max-error-count = &lt;2&gt;;
+
+/* 指定 esd check 读取的寄存器的标准值 buf[0]  buf[1] buf[2] buf[3] buf[4]  buf[5] */
+qcom,mdss-dsi-panel-status-value =  &lt;0xC0&gt;, &lt;0x80  0x73   0x04&gt;, &lt;0x0B&gt;, &lt;0xFD&gt;;
+</code></pre><p>怎么确认的：<br><code>qcom,mdss-dsi-panel-status-command</code> 指定了要 check 哪些寄存器<br><code>qcom,mdss-dsi-panel-status-read-length</code> 指定了要 check 这些寄存器的前几个字节，并将这些字节，依次编号为 0,1,2,3…<br>因此确认到 buf[1] 对应的是 09 寄存器的第一个字节，正常状态下 09h_01 = 0x80，但是异常情况下读取出来的是 0x88, bit3 从 0 变成了 1</p>
+</li>
+<li><p>查看 spec 确认 09h_01[3] 表示什么含义  </p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-01.png" alt="09h_01"></p>
+<p>确认到是 VGL 电压异常，看 spec 描述应该是 VGL 电压高于 esd 侦测的标准，导致 09h_01[3] 被置位，接下来需要实际测量下是否真的是这样的情况</p>
+</li>
+<li><p>交叉主板和三合一，确认到闪屏不良现象跟着三合一模组走  </p>
+</li>
+<li><p>实测良品和不良显示屏单体 VGL 电压<br>这里贴出模组厂验证情况： </p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-02.png" alt="模组厂验证结果"></p>
+<p>确认到不良单体的 VGL 电压较正常品偏低，和步骤3猜想一致  </p>
+</li>
+</ol>
+<h4 id="分析结论"><a href="#分析结论" class="headerlink" title="分析结论"></a>分析结论</h4><p>此闪屏问题为 LCD 三合一模组单体不良，不良单体 VGL 电压较正常单体偏低，导致触发 esd check fail，并且 recover 无法修正，因此出现闪屏现象。</p>
+<h3 id="实例2：闪屏问题衍生问题"><a href="#实例2：闪屏问题衍生问题" class="headerlink" title="实例2：闪屏问题衍生问题"></a>实例2：闪屏问题衍生问题</h3><h4 id="问题描述-1"><a href="#问题描述-1" class="headerlink" title="问题描述"></a>问题描述</h4><p>衍生出来问题情况很复杂，一条一条描述：</p>
+<ol>
+<li>工厂出现不良的机器，发现在 OOB 测试用的 user b08 版本 100% 闪屏，但是在组装用的 eng b08 版本 100% 不闪屏，客户需要我们理清 eng 和 user 版本的区别点</li>
+<li>上面模组厂测试的结果发现，在不同的界面下(桌面、白图、flick图片) VGL 的电压不一致，客户想要理清不一致的原因</li>
+<li>同步和玻璃厂 FAE 确认到玻璃要求的 VGL 电压范围为 <code>-9V ~ -11V</code>，但是从模组厂测试的结果发现，即使是良品也是不符合玻璃 spec 的，客户追问为什么良品也不满足，是否是软件上设置不对</li>
+</ol>
+<h4 id="分析过程-1"><a href="#分析过程-1" class="headerlink" title="分析过程"></a>分析过程</h4><p><strong>议题1：eng 和 user 版本的区别点</strong></p>
+<ol>
+<li><p>将代码回退到 eng B08(Factory分支) 和 user b08(MP分支) 时间节点，对比 lcd 驱动代码和 dtsi 配置文件，驱动和配置完全一模一样。同时使用上海已经拆解的不良品，分别刷 user b08 和 eng b8 版本，使用高精度示波器测量主界面桌面状态下，得到 VGL 电压分别为 8.075V(eng) 和 8.045V(user)，user 和 eng 版本测试结果电压基本一致</p>
+</li>
+<li><p>考虑到模组厂测试的结果，在不同的界面下 VGL 的电压不一致，怀疑是测试场景的区别导致 eng 和 user 版本的 VGL 电压不一致，因此安排工厂使用工厂不良机在 flicker 图片验证 eng 版本是否闪屏，但是工厂不良机已经打回组装车间维修掉了，不良机丢失</p>
+</li>
+<li><p>由于不良机丢失，无法验证工厂不良机是否是测试场景的区别导致 eng 和 user 版本的 VGL 电压不一致，但是从验证步骤1的结论看来，user 版本和 eng 版本 VGL 电压基本一致，客户不再追究 user 和 eng 版本的差异了。但是由于我司工厂生产流程是: <code>贴片 -&gt; 组装 -&gt; 组装测试(eng) -&gt; 前10k的订单会额外进行OOB测试(user) -&gt; 包装 -&gt; 出货</code>，对于后续出货的机器，并不会再刷 user 版本进行 OOB 测试，目前看到有 1pcs 闪屏机器是在 eng 不闪，user 版本才闪，客户需要提供一种卡关策略，要保证所有的 VGL 偏低的单体不良的机器可以在 eng 版本下 100% 被卡下来，保证不会流到用户手中</p>
+</li>
+<li><p>根据上面模组厂测试的结果可以看出在 flicker 图片界面，VGL 被拉到最低，最容易触发 esd check fail。因此卡关策略为将 flicker 图片导入工模 lcd 测试项中，要求产线在测试 lcd 测试项是静置手机在 flicker 图片 10s 左右，观是否有闪屏现象。若闪屏，则当做不良品打出，若不闪，则可以保证用户在其他场景下使用也不会闪屏。此方案客户已经认可，并导入了最新版本中</p>
+</li>
+</ol>
+<p><strong>议题2：为什么不同场景 VGL 电压不一致</strong></p>
+<p>此议题涉及 LCM 内部组成原理，由部件主导回复，软件无需跟进</p>
+<p><strong>议题3：为什么良品三合一的 VGL 电压也不符合玻璃 spec</strong></p>
+<ol>
+<li><p>确认软件设置的 VGL 值是多少<br>屏 dtsi 配置 C1 寄存器值如下：</p>
+<pre><code>qcom,mdss-dsi-on-command = [
+    ... ...
+    /* command format len reg 1  2  3  4  5  6  7  8  9  10 11 12 */
+    39 01 00 00 00 00 0d  C1  54 00 1E 1E 77 C1 FF FF EE EE EE EE
+    ... ...
+]
+</code></pre><p>spec 描述如下：</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-03.png" alt="C1寄存器"></p>
+<p>确认到软件上设置 C1 寄存器的值为 0x54，对照 spec 确认到 VGL 值是 -11V，符合玻璃 spec 标准。但实际输出仅有 8.5V 左右，约 FAE 一起分析，确认到是 <code>C1h_06[5]:TURBO</code> 没有使能 TURBO</p>
+</li>
+<li><p>软件上为什么没有使能 TURBO<br>项目初期是使能了 TURBO 的，但是后面为了解决射频干扰问题，将其关闭了</p>
+</li>
+<li><p>解射频干扰时没有考虑玻璃 VGL 电压要求吗?<br>玻璃 spec Gate 电压要求：</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-05.png" alt="spec"></p>
+<p>玻璃 spec 上仅仅说明了 typ 值是 -10V，并没有指明 min、max 值，一般没有写明 min 值则认为玻璃没有 min 值的要求，因此当时才将 VGL 适当调低以优化射频干扰问题，后面提到的 <code>-9V ~ -11V</code> 是出现闪屏问题后玻璃厂 FAE 提供的电压范围</p>
+</li>
+<li><p>目前所有三合一模组 100% 不符合玻璃 spec 要怎么处理<br>处理方式：重新开启 TURBO 功能<br>此处理方案需要重新调试射频干扰，并且 lcd 主客观测试需要重测，测试好后还要将新的参数重新烧录到模组 OTP 中，和模组厂确认了目前已经生产了 150k 左右的模组，意味着这 150k 的模组，需要重新返工，并且对于已经装机的机器，要拆机成三合一状态，重烧 OTP，是个大动作，此方案客户和项目都不同意</p>
+</li>
+<li><p>实测的 VGL 电压偏低是否会出现大批量闪屏的风险<br>唯一的处理方案客户不同意，那只能将就着使用目前 VGL 设定了，但目前实际测试得到的 VGL 电压和 esd 侦测 VGL 的标准(-8.5V)很接近，可能会出现大批量闪屏的风险，因此考虑将 esd 侦测标准从 -8.5V 修改为 -8.0V<br>屏 dtsi 配置 C6 寄存器值如下：</p>
+<pre><code>qcom,mdss-dsi-on-command = [
+    ... ...
+    /* command format len reg 1  2  3  4  5 */
+    39 01 00 00 00 00 06  C6  26 40 CF 7F 20
+    ... ...
+]
+</code></pre><p> spec 描述如下：  </p>
+<p> <img src="https://raw.githubusercontent.com/mz8023yt/blog.material/master/odm/png/odm-lcm-debug-instance-04.png" alt="C6寄存器"></p>
+<p> 因此将 C6_01 从 26 修改为 16 即可配置 esd check 标准为 8.0V</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/maziot/weixin.png" alt="Paul Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/maziot/alipay.png" alt="Paul Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/qcom/" rel="tag"># qcom</a>
+          
+            <a href="/tags/lcm/" rel="tag"># lcm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/02/mini2440-build-100ask3prj-dev-env/" rel="next" title="[Mini2440] 搭建韦东山三期项目视频学习环境">
+                <i class="fa fa-chevron-left"></i> [Mini2440] 搭建韦东山三期项目视频学习环境
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/13/c-conditional-operator/" rel="prev" title="[C] 条件表达式">
+                [C] 条件表达式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/maziot/avatar.jpg" alt="Paul Wang">
+            
+              <p class="site-author-name" itemprop="name">Paul Wang</p>
+              <p class="site-description motion-element" itemprop="description">但行好事 莫问前程</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:mz8023yt@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/mz8023yt" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/30fc01f695b9" target="_blank" title="Jianshu"><i class="fa fa-fw fa-book"></i>Jianshu</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://mipi.org/" title="mipi" target="_blank">mipi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://git-scm.com/" title="git" target="_blank">git</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hexo.io/" title="hexo" target="_blank">hexo</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com/" title="next" target="_blank">next</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ezgif.com/" title="gif" target="_blank">gif</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fontawesome.dashgame.com/" title="font" target="_blank">font</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kernel.org/" title="kernel" target="_blank">kernel</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#实例1：闪屏问题"><span class="nav-text">实例1：闪屏问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#问题描述"><span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分析过程"><span class="nav-text">分析过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分析结论"><span class="nav-text">分析结论</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实例2：闪屏问题衍生问题"><span class="nav-text">实例2：闪屏问题衍生问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#问题描述-1"><span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分析过程-1"><span class="nav-text">分析过程</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Paul Wang</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">309k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">4:false</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'mz8023yt',
+            repo: 'blog.comments',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '41b269fc8cc71a77e91b3485769b325e249b15dd',
+            
+                client_id: '3b0f546a740181c255a9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('3');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/maziot/maziot-apple.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/maziot/maziot-32x32.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/maziot/maziot-16x16.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/maziot/maziot.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="一. 下载安装 VMware1.1 VMware 介绍VMware 就是我们俗称的虚拟机，通过这个软件我们可以模拟出一台或者多台 PC 机，就好像我们买了很多台电脑一样。我们可以在这些虚拟出来的 PC 机上安装我们的操作系统，可以安装 windows、ubuntu、fedora 等操作系统。然后在运行这个装好了操作系统的 PC 机，将这些主机给虚拟出来，就拥有很多台的 PC 主机。 1.2 下载">
+<meta name="keywords" content="ubuntu,vmware">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Ubuntu] 使用 VMware 虚拟机安装 Ubuntu 系统">
+<meta property="og:url" content="http://yoursite.com/2018/01/01/ubuntu-install-ubuntu-by-vmware/index.html">
+<meta property="og:site_name" content="Paul&#39;s blog">
+<meta property="og:description" content="一. 下载安装 VMware1.1 VMware 介绍VMware 就是我们俗称的虚拟机，通过这个软件我们可以模拟出一台或者多台 PC 机，就好像我们买了很多台电脑一样。我们可以在这些虚拟出来的 PC 机上安装我们的操作系统，可以安装 windows、ubuntu、fedora 等操作系统。然后在运行这个装好了操作系统的 PC 机，将这些主机给虚拟出来，就拥有很多台的 PC 主机。 1.2 下载">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-01.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-02.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-03.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-04.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-05.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-06.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-07.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-08.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-09.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-10.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-11.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-12.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-13.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-01.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-02.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-03.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-04.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-05.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-06.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-07.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-08.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-01.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-02.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-03.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-04.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-05.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-06.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-01.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-02.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-03.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-04.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-05.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-06.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-07.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-08.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-09.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-10.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-11.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-12.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-13.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-14.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-15.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-01.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-02.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-03.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-04.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-05.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-06.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-07.png">
+<meta property="og:updated_time" content="2019-06-06T09:42:25.204Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Ubuntu] 使用 VMware 虚拟机安装 Ubuntu 系统">
+<meta name="twitter:description" content="一. 下载安装 VMware1.1 VMware 介绍VMware 就是我们俗称的虚拟机，通过这个软件我们可以模拟出一台或者多台 PC 机，就好像我们买了很多台电脑一样。我们可以在这些虚拟出来的 PC 机上安装我们的操作系统，可以安装 windows、ubuntu、fedora 等操作系统。然后在运行这个装好了操作系统的 PC 机，将这些主机给虚拟出来，就拥有很多台的 PC 主机。 1.2 下载">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-01.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/01/ubuntu-install-ubuntu-by-vmware/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>[Ubuntu] 使用 VMware 虚拟机安装 Ubuntu 系统 | Paul's blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Paul's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">学而不思则罔 思而不学则殆</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-music">
+    <a href="/music/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-headphones"></i> <br>音乐</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/01/ubuntu-install-ubuntu-by-vmware/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Paul Wang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/maziot/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paul's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[Ubuntu] 使用 VMware 虚拟机安装 Ubuntu 系统
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-01-01 23:48:53" itemprop="dateCreated datePublished" datetime="2018-01-01T23:48:53+08:00">2018-01-01</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-06 17:42:25" itemprop="dateModified" datetime="2019-06-06T17:42:25+08:00">2019-06-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Ubuntu/" itemprop="url" rel="index"><span itemprop="name">Ubuntu</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/01/ubuntu-install-ubuntu-by-vmware/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/01/01/ubuntu-install-ubuntu-by-vmware/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">2.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">2 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一-下载安装-VMware"><a href="#一-下载安装-VMware" class="headerlink" title="一. 下载安装 VMware"></a>一. 下载安装 VMware</h2><h3 id="1-1-VMware-介绍"><a href="#1-1-VMware-介绍" class="headerlink" title="1.1 VMware 介绍"></a>1.1 VMware 介绍</h3><p>VMware 就是我们俗称的虚拟机，通过这个软件我们可以模拟出一台或者多台 PC 机，就好像我们买了很多台电脑一样。<br>我们可以在这些虚拟出来的 PC 机上安装我们的操作系统，可以安装 windows、ubuntu、fedora 等操作系统。然后在运行这个装好了操作系统的 PC 机，将这些主机给虚拟出来，就拥有很多台的 PC 主机。</p>
+<h3 id="1-2-下载-VMware-软件"><a href="#1-2-下载-VMware-软件" class="headerlink" title="1.2 下载 VMware 软件"></a>1.2 下载 VMware 软件</h3><p>百度搜索 VMware 关键字，在百度软件中心可以获取到 VMware 安装包，这里下载的是 12.5.7 版本的 VMware。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-01.png" alt="图片1"></p>
+<p>下载后将会得到一个 exe 的安装包，如下图。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-02.png" alt="图片2"></p>
+<h3 id="1-3-安装-VMware-软件"><a href="#1-3-安装-VMware-软件" class="headerlink" title="1.3 安装 VMware 软件"></a>1.3 安装 VMware 软件</h3><p>双击执行刚刚下载的可执行文件，进入安装向导界面。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-03.png" alt="图片3"></p>
+<p>同意许可协议，不同意不让你安装。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-04.png" alt="图片4"></p>
+<p>选择软件的安装位置，我一般习惯性将 C 改成 D，保持子路径不变。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-05.png" alt="图片5"></p>
+<p>选择是否启动自动检查更新和反馈数据，这两个勾一般我都是不勾的，你们自己看心情。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-06.png" alt="图片6"></p>
+<p>选择是否创建相应的快捷方式。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-07.png" alt="图片7"></p>
+<p>配置好了，要开始安装了。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-08.png" alt="图片8"></p>
+<p>正在安装界面。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-09.png" alt="图片9"></p>
+<p>安装好了，可以选择直接退出，或者输入产品密钥。这里为了方便日后使用，一并激活一下这个软件。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-10.png" alt="图片10"></p>
+<p>百度搜索 “vmware workstation 12 密钥” 可以看到一大串的密钥，随便找一个用都是可以用的。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-11.png" alt="图片11"></p>
+<p>输入许可证。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-12.png" alt="图片12"></p>
+<p>至此，VMware 软件安装完成。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/1-13.png" alt="图片13"></p>
+<h2 id="二-使用-VMware-创建一台虚拟机"><a href="#二-使用-VMware-创建一台虚拟机" class="headerlink" title="二. 使用 VMware 创建一台虚拟机"></a>二. 使用 VMware 创建一台虚拟机</h2><h3 id="2-1-使用-VMware-创建一台虚拟机"><a href="#2-1-使用-VMware-创建一台虚拟机" class="headerlink" title="2.1 使用 VMware 创建一台虚拟机"></a>2.1 使用 VMware 创建一台虚拟机</h3><p>使用 VMware 创建一台虚拟机，这个动作就好比，我们新买了一台电脑，有主板、硬盘、网卡、内存等具体的设备，是一套硬件系统，只不过这些东西都是虚拟出来的。<br>买了电脑之后，我们就可以装自己想要运行的操作系统了，又拥有了一台电脑，是不是很开心。</p>
+<h3 id="2-2-新建虚拟机具体步骤"><a href="#2-2-新建虚拟机具体步骤" class="headerlink" title="2.2 新建虚拟机具体步骤"></a>2.2 新建虚拟机具体步骤</h3><p>运行 VMware 软件，点击新建虚拟机。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-01.png" alt="图片1"></p>
+<p>随后进入虚拟机配置向导。这里选择虚拟机的配置类型，一般都是典型安装，高级要配置的东西太多了。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-02.png" alt="图片2"></p>
+<p>选择是否同时安装操作系统，这个时候同步安装操作系统将会采取简易安装，建议稍后在手动安装操作系统。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-03.png" alt="图片3"></p>
+<p>选择好这台虚拟机将会安装哪种操作系统，注意区分 32/64 位。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-04.png" alt="图片4"></p>
+<p>配置虚拟机名称以及虚拟机在物理磁盘上保存的路径。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-05.png" alt="图片5"></p>
+<p>设置虚拟机的硬盘大小。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-06.png" alt="图片6"></p>
+<p>点击完成，新的虚拟机将按照之前的配置创建。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-07.png" alt="图片7"></p>
+<p>至此，一台新的虚拟机创建成功，创建成功左侧导航栏会有相应的虚拟机选项。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/2-08.png" alt="图片8"></p>
+<h2 id="三-获取-Ubuntu-16-04-LTS"><a href="#三-获取-Ubuntu-16-04-LTS" class="headerlink" title="三. 获取 Ubuntu 16.04 LTS"></a>三. 获取 Ubuntu 16.04 LTS</h2><h3 id="3-1-从官网获取最新的-Ubuntu"><a href="#3-1-从官网获取最新的-Ubuntu" class="headerlink" title="3.1 从官网获取最新的 Ubuntu"></a>3.1 从官网获取最新的 Ubuntu</h3><p>百度搜索 ubuntu 关键字，进入 ubuntu 官网。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-01.png" alt="图片1"></p>
+<p>Ubuntu 为了方便广大中国用户，推出了中文的官方网站。由于在 Ubuntu 官网下载 ubuntu 网速太慢，需要 VPN 才能流畅下载，因此，这里我们进入中文官网，方便下载。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-02.png" alt="图片2"></p>
+<p>进入中文官网，点击下载。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-03.png" alt="图片3"></p>
+<p>下载 64 位版本，或者 32 位版本都行，看你心情。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-04.png" alt="图片4"></p>
+<p>点击对应下载按钮将会弹出下载对话框，开始下载就好。我用的是火狐浏览器，其他浏览器可能直接开始下载了。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-05.png" alt="图片5"></p>
+<p>下载好之后得到 ubuntu iso 镜像包。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/3-06.png" alt="图片6"></p>
+<h2 id="四-虚拟机安装-ubuntu-操作系统"><a href="#四-虚拟机安装-ubuntu-操作系统" class="headerlink" title="四. 虚拟机安装 ubuntu 操作系统"></a>四. 虚拟机安装 ubuntu 操作系统</h2><h3 id="4-1-使用虚拟机安装-Ubuntu-16-04"><a href="#4-1-使用虚拟机安装-Ubuntu-16-04" class="headerlink" title="4.1 使用虚拟机安装 Ubuntu 16.04"></a>4.1 使用虚拟机安装 Ubuntu 16.04</h3><p>运行 VMware 软件，点击编辑虚拟机设置，可以修改虚拟机的硬件配置。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-01.png" alt="图片1"></p>
+<p>在运行虚拟机之前，将下载好的 Ubuntu 镜像加载到光驱中。这样开机便可以从光驱中运行 Ubuntu 安装程序。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-02.png" alt="图片2"></p>
+<p>配置好了光驱，开启虚拟机，开始安装 Ubuntu。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-03.png" alt="图片3"></p>
+<p>开机后出现 Ubuntu logo 界面，说明已经进入了 Ubuntu 安装程序。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-04.png" alt="图片4"></p>
+<p>左侧选择好 Ubuntu 的语言，点击右方 Install Ubuntu 按钮开始安装。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-05.png" alt="图片5"></p>
+<p>这里选择的是安装时是否同步下载更新，还有就是是否安装第三方媒体库，我一般不选，因为这样会增加安装时间。复选框都不勾选，然后点击 Continue。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-06.png" alt="图片6"></p>
+<p>选择磁盘如何处理，可以擦除整个磁盘然后装 Ubuntu，也可以自己自定义分区，在指定的分区中安装 Ubuntu。由于使用虚拟机安装，就不自定义分区了，直接全擦后安装 Ubuntu，这样方便。如果是安装 Windows 和 Ubuntu 双系统的话，建议还是自己自定义分区。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-07.png" alt="图片7"></p>
+<p>这是一个二次确认的对话框，确认要全擦？然后哪些分区将被创建会列举出来。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-08.png" alt="图片8"></p>
+<p>选择位置。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-09.png" alt="图片9"></p>
+<p>选择键盘布局，我们一般都是用的美式布局的键盘，默认就可以了。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-10.png" alt="图片10"></p>
+<p>配置好用户名和主机名以及登录密码。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-11.png" alt="图片11"></p>
+<p>开始安装了，耐心等待一会。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-12.png" alt="图片12"></p>
+<p>安装完毕，提示要重启，这个时候直接关闭虚拟机，直接关机，不要重启。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-13.png" alt="图片13"></p>
+<p>进入虚拟机配置界面，将光驱的配置修改回来，不修改回来的话将无法进入 Ubuntu 系统。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-14.png" alt="图片14"></p>
+<p>至此 Ubuntu 16.04 LTS 成功安装</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/4-15.png" alt="图片15"></p>
+<h2 id="五-虚拟机安装-VM-Tools"><a href="#五-虚拟机安装-VM-Tools" class="headerlink" title="五. 虚拟机安装 VM Tools"></a>五. 虚拟机安装 VM Tools</h2><h3 id="5-1-VMware-Tools-有什么用？"><a href="#5-1-VMware-Tools-有什么用？" class="headerlink" title="5.1 VMware Tools 有什么用？"></a>5.1 VMware Tools 有什么用？</h3><p>安装 VMware Tools 后，最简单直观的体验就是可以从物理主机直接往虚拟机里面拖文件。<br>我们学习嵌入式大都是在 Windows 下阅读、编辑源代码，而编译的过程则是放在 Ubuntu 虚拟机中的。这必然涉及到文件的传输，安装 VMware Tools 之后将极大的方便虚拟机和主机之间的文件传输。</p>
+<h3 id="5-2-安装-VMware-Tools"><a href="#5-2-安装-VMware-Tools" class="headerlink" title="5.2 安装 VMware Tools"></a>5.2 安装 VMware Tools</h3><p>开始安装 VMware Tools</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-01.png" alt="图片1"></p>
+<p>点击之后 Ubuntu 将会加载一个光盘，其中 tar.gz 格式的文件就是 VMware Tools 对应的安装文件。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-02.png" alt="图片2"></p>
+<p>Ubuntu 中使用 Ctrl + Alt + T 调起终端，依次输入以下命令开始安装 VMware Tools。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-03.png" alt="图片3"></p>
+<p>期间或有很多的安装提示选项，除了第一个选项问你是否要安装此程序，默认是 no，安装时需要输入 y 或 yes 以外，其他的安装选项默认即可，安装成功后截图如下。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-04.png" alt="图片4"></p>
+<h3 id="5-3-配置虚拟机共享文件夹"><a href="#5-3-配置虚拟机共享文件夹" class="headerlink" title="5.3 配置虚拟机共享文件夹"></a>5.3 配置虚拟机共享文件夹</h3><p>在开启虚拟机之前，先按照下图配置虚拟机共享文件夹。通过配置共享文件夹，ubuntu 可以通过访问 /mnt/hgfs/Share 目录访问 windows 下的 E:\Share 目录。其中，/mnt/hgfs/Share 中的最后一级目录 Share 是下图中配置的名称，E:\Share 中的 Share 是下图中配置的主机路径。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-05.png" alt="图片5"></p>
+<p>例如我在 /mnt/hgfs/Share 目录下创建了一个 demo 文件。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-06.png" alt="图片6"></p>
+<p>然后打开 Windows 下的 E:\Share 目录下查看，发现确实有了 demo 文件。</p>
+<p><img src="https://raw.githubusercontent.com/mz8023yt/blog/master/image/ubuntu/ubuntu-install-ubuntu-by-vmware/5-07.png" alt="图片7"></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/maziot/weixin.png" alt="Paul Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/maziot/alipay.png" alt="Paul Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ubuntu/" rel="tag"># ubuntu</a>
+          
+            <a href="/tags/vmware/" rel="tag"># vmware</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/08/ubuntu-start-using-ubuntu/" rel="prev" title="[Ubuntu] 开始使用 Ubuntu">
+                [Ubuntu] 开始使用 Ubuntu <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/maziot/avatar.jpg" alt="Paul Wang">
+            
+              <p class="site-author-name" itemprop="name">Paul Wang</p>
+              <p class="site-description motion-element" itemprop="description">但行好事 莫问前程</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:mz8023yt@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/mz8023yt" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/30fc01f695b9" target="_blank" title="Jianshu"><i class="fa fa-fw fa-book"></i>Jianshu</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://mipi.org/" title="mipi" target="_blank">mipi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://git-scm.com/" title="git" target="_blank">git</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hexo.io/" title="hexo" target="_blank">hexo</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com/" title="next" target="_blank">next</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ezgif.com/" title="gif" target="_blank">gif</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fontawesome.dashgame.com/" title="font" target="_blank">font</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kernel.org/" title="kernel" target="_blank">kernel</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一-下载安装-VMware"><span class="nav-text">一. 下载安装 VMware</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-VMware-介绍"><span class="nav-text">1.1 VMware 介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-下载-VMware-软件"><span class="nav-text">1.2 下载 VMware 软件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-安装-VMware-软件"><span class="nav-text">1.3 安装 VMware 软件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-使用-VMware-创建一台虚拟机"><span class="nav-text">二. 使用 VMware 创建一台虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-使用-VMware-创建一台虚拟机"><span class="nav-text">2.1 使用 VMware 创建一台虚拟机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-新建虚拟机具体步骤"><span class="nav-text">2.2 新建虚拟机具体步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三-获取-Ubuntu-16-04-LTS"><span class="nav-text">三. 获取 Ubuntu 16.04 LTS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-从官网获取最新的-Ubuntu"><span class="nav-text">3.1 从官网获取最新的 Ubuntu</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四-虚拟机安装-ubuntu-操作系统"><span class="nav-text">四. 虚拟机安装 ubuntu 操作系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-使用虚拟机安装-Ubuntu-16-04"><span class="nav-text">4.1 使用虚拟机安装 Ubuntu 16.04</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五-虚拟机安装-VM-Tools"><span class="nav-text">五. 虚拟机安装 VM Tools</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-VMware-Tools-有什么用？"><span class="nav-text">5.1 VMware Tools 有什么用？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-安装-VMware-Tools"><span class="nav-text">5.2 安装 VMware Tools</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-配置虚拟机共享文件夹"><span class="nav-text">5.3 配置虚拟机共享文件夹</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Paul Wang</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">309k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">4:false</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'mz8023yt',
+            repo: 'blog.comments',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '41b269fc8cc71a77e91b3485769b325e249b15dd',
+            
+                client_id: '3b0f546a740181c255a9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('3');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

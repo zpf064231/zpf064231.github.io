@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/maziot/maziot-apple.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/maziot/maziot-32x32.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/maziot/maziot-16x16.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/maziot/maziot.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="一. LCD 兼容1.1 lk 阶段启动流程概览lk 阶段框架不妨从 lk 阶段的 c 代码开始分析，第一个执行的 c 语言函数是 main.c 文件中的 kmain 函数。 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354// file: src/">
+<meta name="keywords" content="qcom,lcd">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[ODM] 高通 LCD 框架分析">
+<meta property="og:url" content="http://yoursite.com/2018/04/11/odm-lcm-frame/index.html">
+<meta property="og:site_name" content="Paul&#39;s blog">
+<meta property="og:description" content="一. LCD 兼容1.1 lk 阶段启动流程概览lk 阶段框架不妨从 lk 阶段的 c 代码开始分析，第一个执行的 c 语言函数是 main.c 文件中的 kmain 函数。 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354// file: src/">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-06-06T09:42:25.197Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[ODM] 高通 LCD 框架分析">
+<meta name="twitter:description" content="一. LCD 兼容1.1 lk 阶段启动流程概览lk 阶段框架不妨从 lk 阶段的 c 代码开始分析，第一个执行的 c 语言函数是 main.c 文件中的 kmain 函数。 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354// file: src/">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/04/11/odm-lcm-frame/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>[ODM] 高通 LCD 框架分析 | Paul's blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Paul's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">学而不思则罔 思而不学则殆</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-music">
+    <a href="/music/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-headphones"></i> <br>音乐</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/11/odm-lcm-frame/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Paul Wang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/maziot/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paul's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[ODM] 高通 LCD 框架分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-04-11 17:11:23" itemprop="dateCreated datePublished" datetime="2018-04-11T17:11:23+08:00">2018-04-11</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-06 17:42:25" itemprop="dateModified" datetime="2019-06-06T17:42:25+08:00">2019-06-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Experience/" itemprop="url" rel="index"><span itemprop="name">Experience</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/04/11/odm-lcm-frame/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/04/11/odm-lcm-frame/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">48k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">44 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一-LCD-兼容"><a href="#一-LCD-兼容" class="headerlink" title="一. LCD 兼容"></a>一. LCD 兼容</h2><h3 id="1-1-lk-阶段启动流程概览"><a href="#1-1-lk-阶段启动流程概览" class="headerlink" title="1.1 lk 阶段启动流程概览"></a>1.1 lk 阶段启动流程概览</h3><p>lk 阶段框架不妨从 lk 阶段的 c 代码开始分析，第一个执行的 c 语言函数是 main.c 文件中的 kmain 函数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/kernel/main.c</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">kmain</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function">        <span class="comment">// get us into some sort of thread context</span></span></span><br><span class="line"><span class="function">        <span class="title">thread_init_early</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// early arch stuff</span></span><br><span class="line">        arch_early_init()；</span><br><span class="line"></span><br><span class="line">        <span class="comment">// do any super early platform initialization</span></span><br><span class="line">        platform_early_init();</span><br><span class="line">                board_init();</span><br><span class="line">                platform_clock_init();</span><br><span class="line">                qgic_init();</span><br><span class="line">                qtimer_init();</span><br><span class="line">                scm_init();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// do any super early target initialization</span></span><br><span class="line">        target_early_init();</span><br><span class="line">        bs_set_timestamp(BS_BL_START);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// deal with any static constructors</span></span><br><span class="line">        call_constructors();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// bring up the kernel heap</span></span><br><span class="line">        heap_init();</span><br><span class="line">        __stack_chk_guard_setup();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// initialize the threading system</span></span><br><span class="line">        thread_init();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// initialize the dpc system</span></span><br><span class="line">        dpc_init();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// initialize kernel timers</span></span><br><span class="line">        timer_init();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// create a thread to complete system initialization</span></span><br><span class="line">        thr = thread_create(<span class="string">"bootstrap2"</span>, &amp;bootstrap2, <span class="literal">NULL</span>, DEFAULT_PRIORITY, DEFAULT_STACK_SIZE);</span><br><span class="line">        thread_resume(thr);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// enable interrupts</span></span><br><span class="line">        exit_critical_section();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// become the idle thread</span></span><br><span class="line">        thread_become_idle();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">bootstrap2</span><span class="params">(<span class="keyword">void</span> *arg)</span></span></span><br><span class="line"><span class="function">        <span class="title">arch_init</span><span class="params">()</span></span>;</span><br><span class="line">        platform_init();</span><br><span class="line">        target_init();</span><br><span class="line">                target_keystatus();</span><br><span class="line">                target_sdc_init();</span><br><span class="line">                vib_timed_turn_on(VIBRATE_TIME);</span><br><span class="line">        apps_init();</span><br></pre></td></tr></table></figure>
+<p>简化一些与屏启动不相关的流程后的得到的函数调用关系为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/kernel/main.c</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">kmain</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line">        |-- thread_create("bootstrap2", &amp;bootstrap2, NULL, 16, 8192);</span><br><span class="line">        &lt;=&gt; <span class="keyword">static</span> <span class="keyword">int</span> bootstrap2(<span class="keyword">void</span> *arg)</span><br><span class="line">                |-- apps_init();</span><br></pre></td></tr></table></figure>
+<p>这里可以看出，lk 在做完平台端必要的初始化后，会去启动所谓的 app，那么 app 是什么东西？如何定义？又在哪里被执行？将在下一小节中介绍。</p>
+<h3 id="1-2-lk-阶段-app-启动流程"><a href="#1-2-lk-阶段-app-启动流程" class="headerlink" title="1.2 lk 阶段 app 启动流程"></a>1.2 lk 阶段 app 启动流程</h3><p>先看看 apps_init() 都干了些什么？</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/app/app.c</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;debug.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;app.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;kernel/thread.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">app_descriptor</span> __<span class="title">apps_start</span>;</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">app_descriptor</span> __<span class="title">apps_end</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">start_app</span><span class="params">(<span class="keyword">const</span> struct app_descriptor *app)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* one time setup */</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">apps_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">app_descriptor</span> *<span class="title">app</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* call all the init routines */</span></span><br><span class="line">	<span class="keyword">for</span> (app = &amp;__apps_start; app != &amp;__apps_end; app++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (app-&gt;init)</span><br><span class="line">			app-&gt;init(app);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* start any that want to start on boot */</span></span><br><span class="line">	<span class="keyword">for</span> (app = &amp;__apps_start; app != &amp;__apps_end; app++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (app-&gt;entry &amp;&amp; (app-&gt;flags &amp; APP_FLAG_DONT_START_ON_BOOT) == <span class="number">0</span>) &#123;</span><br><span class="line">			start_app(app);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">app_thread_entry</span><span class="params">(<span class="keyword">void</span> *arg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">app_descriptor</span> *<span class="title">app</span> = (<span class="title">const</span> <span class="title">struct</span> <span class="title">app_descriptor</span> *)<span class="title">arg</span>;</span></span><br><span class="line"></span><br><span class="line">	app-&gt;entry(app, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">start_app</span><span class="params">(<span class="keyword">const</span> struct app_descriptor *app)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">thread_t</span> *thr;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"starting app %s\n"</span>, app-&gt;name);</span><br><span class="line"></span><br><span class="line">	thr = thread_create(app-&gt;name, &amp;app_thread_entry, (<span class="keyword">void</span> *)app, DEFAULT_PRIORITY, DEFAULT_STACK_SIZE);</span><br><span class="line">	<span class="keyword">if</span>(!thr)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	thread_resume(thr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从上面的代码可以看出，每一个 app 都使用 app_descriptor 描述，并具有一个 init 函数，一个 entry 函数和一个 flags 标识。<br>在 apps_init() 中会去遍历一个 app 的列表，分别调用他们的 init 函数，对 app 进行初始化。初始化结束后，还会根据 flags 标识位决定是否调用 start_app(app) 函数创建一个线程运行 app 的 entry 函数。</p>
+<p>那么问题来了，这里的 app 的列表是怎么来的？<br>上面 app 是从 __apps_start 开始取出 app 元素，一直取到 __apps_end 才结束，那么 __apps_start 和 __apps_end 在哪里定义？<br>代码中居然找不到，总有定义的地方吧，grep 搜一下，原来在链接脚本中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[wangbing@ubuntu: lk]$ grep -rsn <span class="string">"__apps_start"</span></span><br><span class="line">arch/arm/trustzone-system-onesegment.ld:51:      __apps_start = .;</span><br><span class="line">arch/arm/system-twosegment.ld:47:                __apps_start = .;</span><br><span class="line">arch/arm/trustzone-test-system-onesegment.ld:52: __apps_start = .;</span><br><span class="line">arch/arm/system-onesegment.ld:47:                __apps_start = .;</span><br></pre></td></tr></table></figure>
+<p>打开链接脚本看看，可以发现四个脚本描述 __apps_start 和 __apps_end 都一样，都是表示 .apps 端的起始结束地址。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">.rodata : &#123; </span><br><span class="line">	*(.rodata .rodata.* .gnu.linkonce.r.*) </span><br><span class="line">	. = ALIGN(4);</span><br><span class="line">	__commands_start = .;</span><br><span class="line">	KEEP (*(.commands))</span><br><span class="line">	__commands_end = .;</span><br><span class="line">	. = ALIGN(4);</span><br><span class="line">	__apps_start = .;               // 起始地址</span><br><span class="line">	KEEP (*(.apps)) </span><br><span class="line">	__apps_end = .;                 // 结束地址</span><br><span class="line">	. = ALIGN(4); </span><br><span class="line">	__rodata_end = . ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看到这里疑问就解除了，app 列表是在从 .apps 段中取出来的。但是新的问题又来了，lk 驱动中是怎么将 app 对应的 app_descriptor 结构链接到 .apps 段中呢？<br>那就好好看看 app.c 和 app.h 文件吧，其中 app.c 上面已经贴出来了，下面仅贴出 app.h 文件。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/app/app.h</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> __APP_H</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> __APP_H</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* app support api */</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">apps_init</span><span class="params">(<span class="keyword">void</span>)</span></span>; <span class="comment">/* one time setup */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* app entry point */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">app_descriptor</span>;</span></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*app_init)</span><span class="params">(<span class="keyword">const</span> struct app_descriptor *)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*app_entry)</span><span class="params">(<span class="keyword">const</span> struct app_descriptor *, <span class="keyword">void</span> *args)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* app startup flags */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> APP_FLAG_DONT_START_ON_BOOT 0x1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* each app needs to define one of these to define its startup conditions */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">app_descriptor</span> &#123;</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">char</span> *name;</span><br><span class="line">	app_init  init;</span><br><span class="line">	app_entry entry;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">int</span> flags;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> APP_START(appname) struct app_descriptor _app_##appname __SECTION(<span class="meta-string">".apps"</span>) = &#123; .name = #appname,</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> APP_END &#125;;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<p>在 app.h 的最后几行提供了两个用于创建 app 的宏，分别是 APP_START 和 APP_END。搜索一下，看看别人是怎么用他们创建 app 的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">---- APP_START Matches (7 <span class="keyword">in</span> 7 files) ----</span><br><span class="line">aboot.c (bootloader\lk\app\aboot) line 5400 :             APP_START(aboot)</span><br><span class="line">clock_tests.c (bootloader\lk\app\clocktests) line 119 :   APP_START(clocktests)</span><br><span class="line">pci_tests.c (bootloader\lk\app\pcitests) line 247 :       APP_START(pcitests)</span><br><span class="line">shell.c (bootloader\lk\app\shell) line 37 :               APP_START(shell)</span><br><span class="line">string_tests.c (bootloader\lk\app\stringtests) line 283 : APP_START(stringtests)</span><br><span class="line">tests.c (bootloader\lk\app\tests) line 42 :               APP_START(tests)</span><br></pre></td></tr></table></figure>
+<p>就以第一个 aboot.c 为例吧，看看它是怎么创建的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/app/aboot/aboot.c</span></span><br><span class="line"></span><br><span class="line">APP_START(aboot)</span><br><span class="line">	.init = aboot_init,</span><br><span class="line">APP_END</span><br></pre></td></tr></table></figure>
+<p>将宏定义展开，没错，就是这里指定该结构存放在 .apps 段。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">app_descriptor</span> _<span class="title">app_aboot</span> __<span class="title">SECTION</span>(".<span class="title">apps</span>") = &#123;</span> .name = aboot,</span><br><span class="line">        .init = aboot_init,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>总结一下：<br>通过 APP_START 和 APP_END 两个宏创建一个 app，这种方式创建的 app 会被链接到 .apps 段。<br>在 lk 启动流程中，最后会遍历 .apps 段中所有的 app，分别执行其中的 init 和 entry 函数。<br>这里就清楚了, app 对应的 app_descriptor 结构必须放在 apps 段中才可以被启动。</p>
+<h3 id="1-3-lk-阶段-lcd-兼容原理"><a href="#1-3-lk-阶段-lcd-兼容原理" class="headerlink" title="1.3 lk 阶段 lcd 兼容原理"></a>1.3 lk 阶段 lcd 兼容原理</h3><h4 id="兼容原理概述"><a href="#兼容原理概述" class="headerlink" title="兼容原理概述"></a>兼容原理概述</h4><p>先介绍下 lcd 的 id 寄存器：MIPI 组织规定各屏厂生产的 lcd ic 的 id 信息必须记录在 A1 寄存器(RDDDB: Read DDB start)中，A1 寄存器中除了第一个字节的供应商 id 是由 MIPI 组织分配的，其他字节供应商可以自定义，可以记录 ic id、ic version code 什么的。这个随便找一块 lcd 的 datasheet 看一下就明白了。</p>
+<p>再简单介绍下 lcd 的兼容原理：原理其实很简单，其实就是代码中已经包含有多块 lcd 驱动程序，在开机过程中，会去读出实际接在手机上的 lcd 模组的 id，将读出的 id 和各个屏驱动中的 id 做对比，如果某一个 lcd 驱动的 id 和读出的 id 一样，则驱动匹配成功，就使用这个匹配上的驱动程序操作 lcd。</p>
+<p>基于上面原理性的介绍，我们也就大概明确了稍后分析 lcd 兼容这部分代码需要理清的主线逻辑了，这里列举一下：</p>
+<ol>
+<li>在哪里读取手机上实际接的 lcd 的 id？</li>
+<li>在哪里遍历所有的 lcd 驱动，并和实际读取的 id 做比对？</li>
+</ol>
+<h4 id="兼容框架分析"><a href="#兼容框架分析" class="headerlink" title="兼容框架分析"></a>兼容框架分析</h4><p>接下就是分析代码了，上一小节分析到 lk 阶段最后是启动各个 app，简单看了各个 app 的流程，最后发现 lk 的探测兼容部分是在 aboot 中实现的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/app/aboot/aboot.c</span></span><br><span class="line"></span><br><span class="line">APP_START(aboot)</span><br><span class="line">	.init = aboot_init,</span><br><span class="line">APP_END</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> aboot_init(<span class="keyword">const</span> struct app_descriptor *app)</span><br><span class="line">    |- target_display_init(device.display_panel);</span><br><span class="line">        |</span><br><span class="line">        |- <span class="keyword">do</span> &#123;</span><br><span class="line">        |   |  <span class="comment">// (1) 依次遍历代码中的兼容的 lcd 驱动做初始化操作</span></span><br><span class="line">        |   |- <span class="built_in">memcpy</span>(oem.panel, (panel_name_my + panel_loop), <span class="number">64</span>);</span><br><span class="line">        |   |- gcdb_display_init(oem.panel, MDP_REV_50, (<span class="keyword">void</span> *)MIPI_FB_ADDR);</span><br><span class="line">        |   |   |- panel_name = oem.panel;</span><br><span class="line">        |   |   |- oem_panel_select(panel_name, &amp;panelstruct, &amp;(panel.panel_info), &amp;dsi_video_mode_phy_db);</span><br><span class="line">        |   |   |   |</span><br><span class="line">        |   |   |   |  <span class="comment">// (2) 根据 panel_name 解析 supp_panels 数组，得到 panel 的编号</span></span><br><span class="line">        |   |   |   |- panel_override_id = panel_name_to_id(supp_panels, ARRAY_SIZE(supp_panels), panel_name);</span><br><span class="line">        |   |   |   |- panel_id = panel_override_id;</span><br><span class="line">        |   |   |   |- init_panel_data(panelstruct, pinfo, phy_db);</span><br><span class="line">        |   |   |       |</span><br><span class="line">        |   |   |       |  <span class="comment">// (3) 根据解析出来 panel 编号，绑定对应的 lcd 驱动函数</span></span><br><span class="line">        |   |   |       |- <span class="keyword">switch</span> (panel_id) &#123;</span><br><span class="line">        |   |   |       |   <span class="keyword">case</span> ST7703_HSD_PANEL:</span><br><span class="line">        |   |   |       |       ... ...</span><br><span class="line">        |   |   |       |   <span class="keyword">case</span> ST7703_BOE_PANEL:</span><br><span class="line">        |   |   |       |       ... ...</span><br><span class="line">        |   |   |       |   <span class="keyword">case</span> HX83102B_HSD_PANEL:</span><br><span class="line">        |   |   |       |       ... ...</span><br><span class="line">        |   |   |       |       pinfo-&gt;mipi.panel_compare_id_read_cmds = HX83102_compare_id_page_command;</span><br><span class="line">        |   |   |       |       pinfo-&gt;mipi.panel_compare_id_page_cmds = HX83102_compare_id_read_command;</span><br><span class="line">        |   |   |       |       pinfo-&gt;mipi.compare_id = HX83102_COMPARE_ID;</span><br><span class="line">        |   |   |       |       pinfo-&gt;mipi.signature = HX83102_SIGNATURE;</span><br><span class="line">        |   |   |       |       ... ...</span><br><span class="line">        |   |   |       |       <span class="keyword">break</span>;</span><br><span class="line">        |   |   |       |- &#125;</span><br><span class="line">        |   |   |</span><br><span class="line">        |   |   |- msm_display_init(&amp;panel);</span><br><span class="line">        |   |           |- msm_display_config();</span><br><span class="line">        |   |               |- mdss_dsi_config(panel);</span><br><span class="line">        |   |                   |- mdss_dsi_panel_initialize(mipi, mipi-&gt;broadcast);</span><br><span class="line">        |   |                       |- mdss_dsi_read_panel_signature(mipi);</span><br><span class="line">        |   |                           |</span><br><span class="line">        |   |                           |  <span class="comment">// (4) 使用绑定的 lcd 驱动函数读取手机实际接的 lcd 的 id</span></span><br><span class="line">        |   |                           |- chip_id = oem_panel_compare_chip_id(mipi);</span><br><span class="line">        |   |                           |       |- mdss_dsi_cmds_tx(mipi, mipi-&gt;panel_compare_id_page_cmds, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">        |   |                           |       |- mdss_dsi_cmds_tx(mipi, mipi-&gt;panel_compare_id_read_cmds, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">        |   |                           |       |- mdss_dsi_cmds_rx(mipi, &amp;lp, <span class="number">1</span>, <span class="number">1</span>);</span><br><span class="line">        |   |                           |       |- <span class="keyword">return</span> (ntohl(*lp) &gt;&gt; <span class="number">16</span>) &amp; <span class="number">0xFF</span>;</span><br><span class="line">        |   |                           |</span><br><span class="line">        |   |                           |  <span class="comment">// (5) 将读取到的 id 和当前的驱动对应的 id 做比对，匹配返回 0，不匹配返回 1</span></span><br><span class="line">        |   |                           |- <span class="keyword">if</span>(chip_id == mipi-&gt;compare_id)</span><br><span class="line">        |   |                           |   <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        |   |                           |- <span class="keyword">else</span></span><br><span class="line">        |   |                               <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        |   |</span><br><span class="line">        |   |  <span class="comment">// (1) 如果 id 匹配成功(ret = 0)或者所有屏驱动都遍历了，但没有一块屏匹配，则跳出循环，不再遍历</span></span><br><span class="line">        |   |- <span class="keyword">if</span> (!ret || ret == ERR_NOT_SUPPORTED)</span><br><span class="line">        |       <span class="keyword">break</span>;</span><br><span class="line">        |</span><br><span class="line">        |  <span class="comment">// (1) 如果没有走到上面 break 的位置，则接着遍历下一个兼容的 lcd 驱动</span></span><br><span class="line">        |- &#125; <span class="keyword">while</span> (++panel_loop &lt;= oem_panel_max_auto_detect_panels());</span><br></pre></td></tr></table></figure>
+<p>上面贴出来的框图仅仅是将 lcd 兼容函数调用关系贴出来了，一些地方描述不是很详细，下面介绍一下上图中做有标号的地方。</p>
+<h4 id="标号1-依次遍历代码中的兼容的-lcd-驱动做初始化操作"><a href="#标号1-依次遍历代码中的兼容的-lcd-驱动做初始化操作" class="headerlink" title="标号1. 依次遍历代码中的兼容的 lcd 驱动做初始化操作"></a>标号1. 依次遍历代码中的兼容的 lcd 驱动做初始化操作</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/target/msm8952/target_display.c</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里记录了目前代码中兼容的 lcd 的 panel name，看数组的第二维大小，得出每个 panel name 占用 64 字节的大小</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">char</span> panel_name_my[<span class="number">5</span>][<span class="number">64</span>] = &#123;</span><br><span class="line">        &#123;<span class="string">"st7703_hsd_55_720p_video"</span>&#125;,</span><br><span class="line">        &#123;<span class="string">"st7703_boe_55_720p_video"</span>&#125;,</span><br><span class="line">        &#123;<span class="string">"hx83102b_hsd_55_720p_video"</span>&#125;,</span><br><span class="line">        &#123;<span class="string">"ili9881p_panda_55_720p_video"</span>&#125;,</span><br><span class="line">        &#123;<span class="string">"ili9881c_hsd_55_720p_video"</span>&#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">target_display_init</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *panel_name)</span> </span>&#123;</span><br><span class="line">        ... ...</span><br><span class="line">        <span class="keyword">do</span> &#123;</span><br><span class="line">                target_force_cont_splash_disable(<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 每个 panel name 占用 64 字节的大小，这里依次取出数组中的 panel name </span></span><br><span class="line">                <span class="built_in">memcpy</span>(oem.panel, (panel_name_my + panel_loop), <span class="number">64</span>);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 将当前取出的 panel name 记录在 oem.panel 中，传递下去</span></span><br><span class="line">                ret = gcdb_display_init(oem.panel, MDP_REV_50, (<span class="keyword">void</span> *)MIPI_FB_ADDR);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 如果 id 匹配成功(ret = 0)或者所有屏驱动都遍历了，但没有一块屏匹配，则跳出循环，不再遍历</span></span><br><span class="line">                <span class="keyword">if</span> (!ret || ret == ERR_NOT_SUPPORTED) &#123;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        target_force_cont_splash_disable(<span class="literal">true</span>);</span><br><span class="line">                        msm_display_off();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果没有走到上面 break 的位置，则接着遍历下一个兼容的 lcd 驱动</span></span><br><span class="line">        <span class="comment">// 循环的次数为代码中兼容的屏的个数</span></span><br><span class="line">        &#125; <span class="keyword">while</span> (++panel_loop &lt;= oem_panel_max_auto_detect_panels());</span><br><span class="line">        ... ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/target/msm8952/oem_panel.c</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 代码中兼容的屏的个数</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DISPLAY_MAX_PANEL_DETECTION 5</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> oem_panel_max_auto_detect_panels()</span><br><span class="line">&#123;</span><br><span class="line">        <span class="comment">// 原本是这段代码，需要根据 target_panel_auto_detect_enabled 函数判断当前处理器平台是否开启了兼容功能</span></span><br><span class="line">        <span class="comment">// return target_panel_auto_detect_enabled() ? DISPLAY_MAX_PANEL_DETECTION : 0;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 现在是直接修改为使能兼容状态，返回兼容的屏的个数</span></span><br><span class="line">        <span class="keyword">return</span> DISPLAY_MAX_PANEL_DETECTION;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="标号2-根据-panel-name-解析-supp-panels-数组，得到-panel-的编号"><a href="#标号2-根据-panel-name-解析-supp-panels-数组，得到-panel-的编号" class="headerlink" title="标号2. 根据 panel_name 解析 supp_panels 数组，得到 panel 的编号"></a>标号2. 根据 panel_name 解析 supp_panels 数组，得到 panel 的编号</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/dev/gcdb/display/panel_display.h</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">panel_list</span> &#123;</span></span><br><span class="line">        <span class="keyword">char</span> name[MAX_PANEL_ID_LEN];</span><br><span class="line">        <span class="keyword">uint32_t</span> id;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/target/msm8952/oem_panel.c</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> &#123;</span><br><span class="line">        ST7703_HSD_PANEL,</span><br><span class="line">        ST7703_BOE_PANEL,</span><br><span class="line">        HX83102B_HSD_PANEL,</span><br><span class="line">        ILI9881P_PANDA_PANEL,</span><br><span class="line">        ILI9881C_HSD_PANEL,</span><br><span class="line">        UNKNOWN_PANEL</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * The list of panels that are supported on this target.</span></span><br><span class="line"><span class="comment"> * Any panel in this list can be selected using fastboot oem command.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">panel_list</span> <span class="title">supp_panels</span>[] = &#123;</span></span><br><span class="line">        &#123;<span class="string">"st7703_hsd_55_720p_video"</span>,     ST7703_HSD_PANEL&#125;,</span><br><span class="line">        &#123;<span class="string">"st7703_boe_55_720p_video"</span>,     ST7703_BOE_PANEL&#125;,</span><br><span class="line">        &#123;<span class="string">"hx83102b_hsd_55_720p_video"</span>,   HX83102B_HSD_PANEL&#125;,</span><br><span class="line">        &#123;<span class="string">"ili9881p_panda_55_720p_video"</span>, ILI9881P_PANDA_PANEL&#125;,</span><br><span class="line">        &#123;<span class="string">"ili9881c_hsd_55_720p_video"</span>,   ILI9881C_HSD_PANEL&#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/dev/gcdb/display/panel_display.c</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int32_t</span> panel_name_to_id(struct panel_list supp_panels[], <span class="keyword">uint32_t</span> supp_panels_size, <span class="keyword">const</span> <span class="keyword">char</span> *panel_name)</span><br><span class="line">&#123;</span><br><span class="line">        <span class="keyword">uint32_t</span> i;</span><br><span class="line">        <span class="keyword">int32_t</span> panel_id = ERR_NOT_FOUND;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (!panel_name) &#123;</span><br><span class="line">                dprintf(CRITICAL, <span class="string">"Invalid panel name\n"</span>);</span><br><span class="line">                <span class="keyword">return</span> panel_id;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 根据 panel_name 解析 supp_panels 数组，得到 panel 的编号</span></span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; supp_panels_size; i++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!<span class="built_in">strncmp</span>(panel_name, supp_panels[i].name, MAX_PANEL_ID_LEN)) &#123;</span><br><span class="line">                        panel_id = supp_panels[i].id;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> panel_id;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="标号3-根据解析出来-panel-编号，绑定对应的-lcd-驱动函数"><a href="#标号3-根据解析出来-panel-编号，绑定对应的-lcd-驱动函数" class="headerlink" title="标号3. 根据解析出来 panel 编号，绑定对应的 lcd 驱动函数"></a>标号3. 根据解析出来 panel 编号，绑定对应的 lcd 驱动函数</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/target/msm8952/oem_panel.c</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 需要包含屏供应商提供头文件</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"include/panel_st7703_co55swr8_video.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"include/panel_st7703_boe55_video.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"include/panel_hx83102b_hsd_video.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"include/panel_ili9881p_panda5_video.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"include/dsi_panel_ili9881c_hsd_huashi_video.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">init_panel_data</span><span class="params">(struct panel_struct *panelstruct, struct msm_panel_info *pinfo, struct mdss_dsi_phy_ctrl *phy_db)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> pan_type = PANEL_TYPE_DSI;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">oem_panel_data</span> *<span class="title">oem_data</span> = <span class="title">mdss_dsi_get_oem_data_ptr</span>();</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">switch</span> (panel_id)</span><br><span class="line">        &#123;</span><br><span class="line">        <span class="keyword">case</span> ST7703_HSD_PANEL:</span><br><span class="line">                ... ...</span><br><span class="line">        <span class="keyword">case</span> ST7703_BOE_PANEL:</span><br><span class="line">                ... ...</span><br><span class="line">        <span class="comment">// 等号右边的变量都来自 panel_hx83102b_hsd_video.h 头文件中</span></span><br><span class="line">        <span class="keyword">case</span> HX83102B_HSD_PANEL:</span><br><span class="line">                panelstruct-&gt;paneldata = &amp;HX83102_B_720p_hsd_video_panel_data;</span><br><span class="line">                panelstruct-&gt;paneldata-&gt;panel_with_enable_gpio = <span class="number">1</span>;</span><br><span class="line">                panelstruct-&gt;panelres = &amp;HX83102_B_720p_hsd_video_panel_res;</span><br><span class="line">                panelstruct-&gt;color = &amp;HX83102_B_720p_hsd_video_color;</span><br><span class="line">                panelstruct-&gt;videopanel = &amp;HX83102_B_720p_hsd_video_video_panel;</span><br><span class="line">                panelstruct-&gt;commandpanel = &amp;HX83102_B_720p_hsd_video_command_panel;</span><br><span class="line">                panelstruct-&gt;state = &amp;HX83102_B_720p_hsd_video_state;</span><br><span class="line">                panelstruct-&gt;laneconfig = &amp;HX83102_B_720p_hsd_video_lane_config;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 读取屏 chip id 的 mipi cmd</span></span><br><span class="line">                pinfo-&gt;mipi.panel_compare_id_read_cmds = HX83102_B_720p_video_compare_id_page_command;</span><br><span class="line">                pinfo-&gt;mipi.panel_compare_id_page_cmds = HX83102_B_720p_video_compare_id_read_command;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 屏驱动文件中记录的屏 chip id</span></span><br><span class="line">                pinfo-&gt;mipi.compare_id = HX83102_B_720P_VIDEO_COMPARE_ID;</span><br><span class="line"></span><br><span class="line">                panelstruct-&gt;paneltiminginfo = &amp;HX83102_B_720p_hsd_video_timing_info;</span><br><span class="line">                panelstruct-&gt;panelresetseq = &amp;HX83102_B_720p_hsd_video_reset_seq;</span><br><span class="line">                panelstruct-&gt;backlightinfo = &amp;HX83102_B_720p_hsd_video_backlight;</span><br><span class="line">                pinfo-&gt;mipi.panel_on_cmds = HX83102_B_720p_hsd_video_on_command;</span><br><span class="line">                pinfo-&gt;mipi.num_of_panel_on_cmds = HX83102_B_720P_HSD_VIDEO_ON_COMMAND;</span><br><span class="line">                pinfo-&gt;mipi.panel_off_cmds = HX83102_B_720p_hsd_video_off_command;</span><br><span class="line">                pinfo-&gt;mipi.num_of_panel_off_cmds = HX83102_B_720P_HSD_VIDEO_OFF_COMMAND;</span><br><span class="line">                <span class="built_in">memcpy</span>(phy_db-&gt;timing, HX83102_B_720p_hsd_video_timings, TIMING_SIZE);</span><br><span class="line">                pinfo-&gt;mipi.signature = HX83102_B_720P_HSD_VIDEO_SIGNATURE;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        ... ...</span><br><span class="line">        <span class="keyword">case</span> UNKNOWN_PANEL:</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">                <span class="built_in">memset</span>(panelstruct, <span class="number">0</span>, <span class="keyword">sizeof</span>(struct panel_struct));</span><br><span class="line">                <span class="built_in">memset</span>(pinfo-&gt;mipi.panel_on_cmds, <span class="number">0</span>, <span class="keyword">sizeof</span>(struct mipi_dsi_cmd));</span><br><span class="line">                pinfo-&gt;mipi.num_of_panel_on_cmds = <span class="number">0</span>;</span><br><span class="line">                <span class="built_in">memset</span>(pinfo-&gt;mipi.panel_off_cmds, <span class="number">0</span>, <span class="keyword">sizeof</span>(struct mipi_dsi_cmd));</span><br><span class="line">                pinfo-&gt;mipi.num_of_panel_off_cmds = <span class="number">0</span>;</span><br><span class="line">                <span class="built_in">memset</span>(phy_db-&gt;timing, <span class="number">0</span>, TIMING_SIZE);</span><br><span class="line">                pan_type = PANEL_TYPE_UNKNOWN;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> pan_type;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="标号4标号5-探测位置"><a href="#标号4标号5-探测位置" class="headerlink" title="标号4标号5. 探测位置"></a>标号4标号5. 探测位置</h4><p>标号4和标号5的位置比较简单，不涉及其他没有贴出来的变量或函数，就不再去详细介绍。</p>
+<h3 id="1-4-kernel-阶段-lcd-兼容原理"><a href="#1-4-kernel-阶段-lcd-兼容原理" class="headerlink" title="1.4 kernel 阶段 lcd 兼容原理"></a>1.4 kernel 阶段 lcd 兼容原理</h3><h4 id="兼容原理概述-1"><a href="#兼容原理概述-1" class="headerlink" title="兼容原理概述"></a>兼容原理概述</h4><p>kernel 阶段的兼容相比 lk 阶段要简单的多，由于在 lk 阶段已经做过了遍历所有屏驱动探测 lcd 的动作，再加上 bootloader 可以通过 cmdline 传参机制传递信息到 kernel 中。这样的话，完全可以通过 cmdline 将 lk 阶段的探测到的屏名称直接传递到 kernel，kernel 拿到传递过来的 panel name 再去加载对应的屏驱动。</p>
+<h4 id="兼容框架分析-1"><a href="#兼容框架分析-1" class="headerlink" title="兼容框架分析"></a>兼容框架分析</h4><p>lk 阶段将屏信息写入 cmdline。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/app/aboot/aboot.c</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">char</span> display_panel_buf[MAX_PANEL_BUF_SIZE];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">aboot_init</span><span class="params">(<span class="keyword">const</span> struct app_descriptor *app)</span></span></span><br><span class="line">        |-- memset(display_panel_buf, '\0', MAX_PANEL_BUF_SIZE);</span><br><span class="line">        |-- boot_linux_from_mmc();</span><br><span class="line">                |-- boot_linux(hdr-&gt;kernel_addr, hdr-&gt;tags_addr, hdr-&gt;cmdline, board_machtype(), hdr-&gt;ramdisk_addr, hdr-&gt;ramdisk_size);</span><br><span class="line">                        |-- cmdline = hdr-&gt;cmdline;</span><br><span class="line">                        |-- final_cmdline = update_cmdline(cmdline);</span><br><span class="line">                        |       |-- target_display_panel_node(display_panel_buf, MAX_PANEL_BUF_SIZE);</span><br><span class="line">                        |       |-- pbuf = display_panel_buf</span><br><span class="line">                        |       |       |-- gcdb_display_cmdline_arg(pbuf, buf_size);</span><br><span class="line">                        |       |               |</span><br><span class="line">                        |       |               |   <span class="comment">// 将屏供应商提供的头文件中的 panel config 保存到 pbuf 中</span></span><br><span class="line">                        |       |               |-- panel_node = panelstruct.paneldata-&gt;panel_node_id;</span><br><span class="line">                        |       |               |-- strlcpy(pbuf, panel_node, buf_size);</span><br><span class="line">                        |       |</span><br><span class="line">                        |       |   <span class="comment">// 设置拷贝的目的地址为 cmdline_final(cmdline)</span></span><br><span class="line">                        |       |-- dst = cmdline_final;</span><br><span class="line">                        |       |</span><br><span class="line">                        |       |   <span class="comment">// 设置拷贝的源地址为 display_panel_buf(panel config)</span></span><br><span class="line">                        |       |-- src = display_panel_buf;</span><br><span class="line">                        |       |-- <span class="keyword">if</span> (have_cmdline)</span><br><span class="line">                        |       |        --dst;</span><br><span class="line">                        |       |</span><br><span class="line">                        |       |   <span class="comment">// 将 panel config 追加到 cmdline</span></span><br><span class="line">                        |       |-- <span class="keyword">while</span> ((*dst++ = *src++));</span><br><span class="line">                        |       |--<span class="keyword">return</span> cmdline_final;</span><br><span class="line">                        |</span><br><span class="line">                        |-- update_device_tree((<span class="keyword">void</span> *)tags, (<span class="keyword">const</span> <span class="keyword">char</span> *)final_cmdline, ramdisk, ramdisk_size);</span><br><span class="line">                                |-- fdt_appendprop_string(fdt, offset, (<span class="keyword">const</span> <span class="keyword">char</span>*)<span class="string">"bootargs"</span>, (<span class="keyword">const</span> <span class="keyword">void</span>*)cmdline);</span><br><span class="line">                                ... ... 待补充</span><br></pre></td></tr></table></figure>
+<p>kernel 阶段解析 cmdline 获取到 lk 传递过来的屏信息。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/kernel/msm-3.18/drivers/video/msm/mdss/mdss_dsi.c</span></span><br><span class="line"></span><br><span class="line">module_init(mdss_dsi_ctrl_driver_init);</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">init <span class="title">mdss_dsi_ctrl_driver_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function">        <span class="title">mdss_dsi_ctrl_register_driver</span><span class="params">()</span></span>;</span><br><span class="line">                platform_driver_register(&amp;mdss_dsi_ctrl_driver);</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">platform_driver</span> <span class="title">mdss_dsi_ctrl_driver</span> = &#123;</span></span><br><span class="line">        .probe = mdss_dsi_ctrl_probe,</span><br><span class="line">        .remove = mdss_dsi_ctrl_remove,</span><br><span class="line">        .shutdown = <span class="literal">NULL</span>,</span><br><span class="line">        .driver = &#123;</span><br><span class="line">                .name = <span class="string">"mdss_dsi_ctrl"</span>,</span><br><span class="line">                .of_match_table = mdss_dsi_ctrl_dt_match,</span><br><span class="line">        &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 匹配的 dts 节点在这里指定 "qcom,mdss-dsi-ctrl"</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">of_device_id</span> <span class="title">mdss_dsi_ctrl_dt_match</span>[] = &#123;</span></span><br><span class="line">        &#123;.compatible = <span class="string">"qcom,mdss-dsi-ctrl"</span>&#125;,</span><br><span class="line">        &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">mdss_dsi_ctrl_probe</span><span class="params">(struct platform_device *pdev)</span></span></span><br><span class="line">        |</span><br><span class="line">        |-- <span class="class"><span class="keyword">struct</span> <span class="title">device_node</span> *<span class="title">dsi_pan_node</span> = <span class="title">mdss_dsi_config_panel</span>(<span class="title">pdev</span>, <span class="title">index</span>);</span></span><br><span class="line">                |</span><br><span class="line">                |   <span class="comment">// 取出私有数据</span></span><br><span class="line">                |-- <span class="class"><span class="keyword">struct</span> <span class="title">mdss_dsi_ctrl_pdata</span> *<span class="title">ctrl_pdata</span> = <span class="title">platform_get_drvdata</span>(<span class="title">pdev</span>);</span></span><br><span class="line">                |-- <span class="keyword">char</span> panel_cfg[MDSS_MAX_PANEL_LEN];</span><br><span class="line">                |</span><br><span class="line">                |   <span class="comment">// 通过私有数据中的函数接口获取到屏的配置信息</span></span><br><span class="line">                |-- mdss_dsi_get_panel_cfg(panel_cfg, ctrl_pdata);</span><br><span class="line">                |       |-- ctrl = ctrl_pdata;</span><br><span class="line">                |       |</span><br><span class="line">                |       |   <span class="comment">// 这里通过 panel_intf_type 函数获取到屏的配置信息</span></span><br><span class="line">                |       |   <span class="comment">// 这里获取到的字符串是 0:qcom,dsi_co55swr8_st7703_720p_video:1:none:cfg:single_dsi</span></span><br><span class="line">                |       |-- pan_cfg = ctrl-&gt;mdss_util-&gt;panel_intf_type(MDSS_PANEL_INTF_DSI);</span><br><span class="line">                |       |-- strlcpy(panel_cfg, pan_cfg-&gt;arg_cfg, <span class="keyword">sizeof</span>(pan_cfg-&gt;arg_cfg));</span><br><span class="line">                |</span><br><span class="line">                |   <span class="comment">// 通过 panel_cfg 找到对应屏的 dts 节点, panel_cfg 字符串就是从 cmd line 中解析出来的</span></span><br><span class="line">                |-- <span class="class"><span class="keyword">struct</span> <span class="title">device_node</span> *<span class="title">dsi_pan_node</span> = <span class="title">mdss_dsi_find_panel_of_node</span>(<span class="title">pdev</span>, <span class="title">panel_cfg</span>);</span></span><br><span class="line">                |</span><br><span class="line">                |   <span class="comment">// 拿到了对应的 dts 节点就可以去初始化 panel 了</span></span><br><span class="line">                |-- mdss_dsi_panel_init(dsi_pan_node, ctrl_pdata, ndx);</span><br><span class="line">                |       |</span><br><span class="line">                |       |   <span class="comment">// 将 panel nane 取出，写到 device info 中</span></span><br><span class="line">                |       |-- panel_name = of_get_property(node, <span class="string">"qcom,mdss-dsi-panel-name"</span>, <span class="literal">NULL</span>);</span><br><span class="line">                |       |-- <span class="built_in">sprintf</span>(wind_device_info.lcm_module_info.ic_name, <span class="string">"%s"</span>, panel_name);</span><br><span class="line">                |       |</span><br><span class="line">                |       |   <span class="comment">// 绑定上电和背光控制的操作函数，后面有章节专门介绍</span></span><br><span class="line">                |       |-- ctrl_pdata-&gt;on = mdss_dsi_panel_on;</span><br><span class="line">                |       |-- ctrl_pdata-&gt;off = mdss_dsi_panel_off;</span><br><span class="line">                |       |-- ctrl_pdata-&gt;panel_data.set_backlight = mdss_dsi_panel_bl_ctrl;</span><br><span class="line">                |</span><br><span class="line">                |-- <span class="keyword">return</span> dsi_pan_node;</span><br></pre></td></tr></table></figure>
+<p>lk 阶段在将 panel_config 写进 cmdline，kernel 中解析出出 cmdline 中 panel_config 的 panel_node_id，找到 panel_node_id 同名的 dts 节点。最后将找到的 dts 节点中的 “qcom,mdss-dsi-panel-name” 属性值写进 device info。<br>总结一下：这样的话就要求 panel_config-&gt;panel_node_id 要和屏 dts 节点名要相同。</p>
+<h2 id="二-LCD-移植"><a href="#二-LCD-移植" class="headerlink" title="二. LCD 移植"></a>二. LCD 移植</h2><h3 id="2-1-lk-阶段-lcd-移植流程"><a href="#2-1-lk-阶段-lcd-移植流程" class="headerlink" title="2.1 lk 阶段 lcd 移植流程"></a>2.1 lk 阶段 lcd 移植流程</h3><p>经过上面兼容框架的分析，现在接着思考下在 lk 阶段 porting 一块新的 lcd 需要修改哪些地方。</p>
+<h4 id="修改点1-屏参数头文件"><a href="#修改点1-屏参数头文件" class="headerlink" title="修改点1. 屏参数头文件"></a>修改点1. 屏参数头文件</h4><p>将屏供应商提供的屏参数头文件，如 panel_hx83102b_hsd_video.h 文件添加到 src/bootable/bootloader/lk/dev/gcdb/display/include/ 目录下。<br>这个屏参数头文件中，包含有屏的启动参数，屏的配置信息等，在 init_panel_data() 函数中会将使用到这些信息。</p>
+<h4 id="修改点2-target-display-c"><a href="#修改点2-target-display-c" class="headerlink" title="修改点2. target_display.c"></a>修改点2. target_display.c</h4><p>这里需要在 panel_name_my 中追加新添加的 panel name，这样在遍历 lcd 驱动的时候才会取出新添加的屏驱动做探测的动作。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">diff --git a/bootable/bootloader/lk/target/msm8952/target_display.c b/bootable/bootloader/lk/target/msm8952/target_display.c</span><br><span class="line">index a4548d7.<span class="number">.16</span>bd60b <span class="number">100644</span></span><br><span class="line">--- a/bootable/bootloader/lk/target/msm8952/target_display.c</span><br><span class="line">+++ b/bootable/bootloader/lk/target/msm8952/target_display.c</span><br><span class="line">@@ <span class="number">-59</span>,<span class="number">6</span> +<span class="number">59</span>,<span class="number">7</span> @@</span><br><span class="line"> <span class="meta">#<span class="meta-keyword">define</span> TRULY_CMD_PANEL_STRING <span class="meta-string">"1:dsi:0:qcom,mdss_dsi_truly_720p_cmd:1:none:cfg:single_dsi"</span></span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">static</span> <span class="keyword">char</span> panel_name_my[<span class="number">5</span>][<span class="number">64</span>] = &#123;</span><br><span class="line">+       &#123;<span class="string">"hx83102b_hsd_55_720p_video"</span>&#125;,</span><br><span class="line">        &#123;<span class="string">"st7703_hsd_55_720p_video"</span>&#125;,</span><br><span class="line">        &#123;<span class="string">"st7703_boe_55_720p_video"</span>&#125;,</span><br><span class="line">        &#123;<span class="string">"ili9881p_panda_55_720p_video"</span>&#125;,</span><br><span class="line">        &#123;<span class="string">"ili9881c_hsd_55_720p_video"</span>&#125;,</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="修改点3-oem-panel-c"><a href="#修改点3-oem-panel-c" class="headerlink" title="修改点3. oem_panel.c"></a>修改点3. oem_panel.c</h4><p>这里文件修改点比较多，有 5 修改点，分别是：</p>
+<ol>
+<li>包含屏参数头文件。</li>
+<li>在枚举中追加新兼容的屏的 panel id。</li>
+<li>将新兼容屏的 panel name 和 panel id 匹配上，并追加到 supp_panels 数组中。</li>
+<li>在 switch (panel_id) 位置绑定屏相关参数。</li>
+<li>修改目前兼容的 lcd 的数量。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">diff --git a/bootable/bootloader/lk/target/msm8952/oem_panel.c b/bootable/bootloader/lk/target/msm8952/oem_panel.c</span><br><span class="line">index d838a8b.<span class="number">.742053</span>b <span class="number">100644</span></span><br><span class="line">--- a/bootable/bootloader/lk/target/msm8952/oem_panel.c</span><br><span class="line">+++ b/bootable/bootloader/lk/target/msm8952/oem_panel.c</span><br><span class="line">@@ <span class="number">-66</span>,<span class="number">6</span> +<span class="number">66</span>,<span class="number">7</span> @@</span><br><span class="line"> <span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"include/panel_st7703_co55swr8_video.h"</span></span></span><br><span class="line"> <span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"include/panel_st7703_boe55_video.h"</span></span></span><br><span class="line"> <span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"include/panel_ili9881p_panda5_video.h"</span></span></span><br><span class="line">+<span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"include/panel_hx83102b_hsd_video.h"</span></span></span><br><span class="line"></span><br><span class="line"> <span class="comment">/*---------------------------------------------------------------------------*/</span></span><br><span class="line"> <span class="comment">/* static panel selection variable                                           */</span></span><br><span class="line">@@ <span class="number">-74</span>,<span class="number">6</span> +<span class="number">75</span>,<span class="number">7</span> @@</span><br><span class="line"> <span class="meta">#<span class="meta-keyword">define</span> ID1_PIN 61</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">enum</span> &#123;</span><br><span class="line">+       HX83102B_HSD_PANEL,</span><br><span class="line">        ST7703_HSD_PANEL,</span><br><span class="line">        ST7703_BOE_PANEL,</span><br><span class="line">        ILI9881P_PANDA_PANEL,</span><br><span class="line">@@ <span class="number">-108</span>,<span class="number">6</span> +<span class="number">110</span>,<span class="number">7</span> @@ <span class="keyword">uint32_t</span> panel_regulator_settings[] = &#123;</span><br><span class="line">  * Any panel in <span class="keyword">this</span> <span class="built_in">list</span> can be selected <span class="keyword">using</span> fastboot oem command.</span><br><span class="line">  */</span><br><span class="line"> <span class="keyword">static</span> struct panel_list supp_panels[] = &#123;</span><br><span class="line">+       &#123;<span class="string">"hx83102b_hsd_55_720p_video"</span>,   HX83102B_HSD_PANEL&#125;,</span><br><span class="line">        &#123;<span class="string">"st7703_hsd_55_720p_video"</span>,     ST7703_HSD_PANEL&#125;,</span><br><span class="line">        &#123;<span class="string">"st7703_boe_55_720p_video"</span>,     ST7703_BOE_PANEL&#125;,</span><br><span class="line">        &#123;<span class="string">"ili9881p_panda_55_720p_video"</span>, ILI9881P_PANDA_PANEL&#125;,</span><br><span class="line"></span><br><span class="line">@@ <span class="number">-191</span>,<span class="number">6</span> +<span class="number">194</span>,<span class="number">28</span> @@ <span class="keyword">static</span> <span class="keyword">int</span> init_panel_data(struct panel_struct *panelstruct,</span><br><span class="line"></span><br><span class="line">        <span class="keyword">switch</span> (panel_id)</span><br><span class="line">        &#123;</span><br><span class="line">+       <span class="keyword">case</span> HX83102B_HSD_PANEL:</span><br><span class="line">+               panelstruct-&gt;paneldata = &amp;HX83102_B_720p_hsd_video_panel_data;</span><br><span class="line">+               panelstruct-&gt;paneldata-&gt;panel_with_enable_gpio = <span class="number">1</span>;</span><br><span class="line">+               panelstruct-&gt;panelres = &amp;HX83102_B_720p_hsd_video_panel_res;</span><br><span class="line">+               panelstruct-&gt;color = &amp;HX83102_B_720p_hsd_video_color;</span><br><span class="line">+               panelstruct-&gt;videopanel = &amp;HX83102_B_720p_hsd_video_video_panel;</span><br><span class="line">+               panelstruct-&gt;commandpanel = &amp;HX83102_B_720p_hsd_video_command_panel;</span><br><span class="line">+               panelstruct-&gt;state = &amp;HX83102_B_720p_hsd_video_state;</span><br><span class="line">+               panelstruct-&gt;laneconfig = &amp;HX83102_B_720p_hsd_video_lane_config;</span><br><span class="line">+               pinfo-&gt;mipi.panel_compare_id_read_cmds = HX83102_B_720p_video_compare_id_page_command;</span><br><span class="line">+               pinfo-&gt;mipi.panel_compare_id_page_cmds = HX83102_B_720p_video_compare_id_read_command;</span><br><span class="line">+               pinfo-&gt;mipi.compare_id = HX83102_B_720P_VIDEO_COMPARE_ID;</span><br><span class="line">+               panelstruct-&gt;paneltiminginfo = &amp;HX83102_B_720p_hsd_video_timing_info;</span><br><span class="line">+               panelstruct-&gt;panelresetseq = &amp;HX83102_B_720p_hsd_video_reset_seq;</span><br><span class="line">+               panelstruct-&gt;backlightinfo = &amp;HX83102_B_720p_hsd_video_backlight;</span><br><span class="line">+               pinfo-&gt;mipi.panel_on_cmds = HX83102_B_720p_hsd_video_on_command;</span><br><span class="line">+               pinfo-&gt;mipi.num_of_panel_on_cmds = HX83102_B_720P_HSD_VIDEO_ON_COMMAND;</span><br><span class="line">+               pinfo-&gt;mipi.panel_off_cmds = HX83102_B_720p_hsd_video_off_command;</span><br><span class="line">+               pinfo-&gt;mipi.num_of_panel_off_cmds = HX83102_B_720P_HSD_VIDEO_OFF_COMMAND;</span><br><span class="line">+               <span class="built_in">memcpy</span>(phy_db-&gt;timing, HX83102_B_720p_hsd_video_timings, TIMING_SIZE);</span><br><span class="line">+               pinfo-&gt;mipi.signature = HX83102_B_720P_HSD_VIDEO_SIGNATURE;</span><br><span class="line">+               <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> ST7703_BOE_PANEL:</span><br><span class="line">                panelstruct-&gt;paneldata = &amp;st7703_boe55_720p_video_panel_data;</span><br><span class="line">                panelstruct-&gt;paneldata-&gt;panel_with_enable_gpio = <span class="number">1</span>;</span><br><span class="line">@@ <span class="number">-895</span>,<span class="number">7</span> +<span class="number">920</span>,<span class="number">7</span> @@ <span class="keyword">uint32_t</span> oem_panel_compare_chip_id(struct mipi_panel_info *mipi)</span><br><span class="line">        <span class="keyword">return</span> data;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line">-#define DISPLAY_MAX_PANEL_DETECTION <span class="number">3</span></span><br><span class="line">+#define DISPLAY_MAX_PANEL_DETECTION <span class="number">4</span></span><br><span class="line"> <span class="keyword">static</span> <span class="keyword">uint32_t</span> auto_pan_loop = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">uint32_t</span> oem_panel_max_auto_detect_panels()</span><br></pre></td></tr></table></figure>
+<h3 id="2-2-kernel-阶段-lcd-移植流程"><a href="#2-2-kernel-阶段-lcd-移植流程" class="headerlink" title="2.2 kernel 阶段 lcd 移植流程"></a>2.2 kernel 阶段 lcd 移植流程</h3><h4 id="修改点1-添加屏相关的-dtsi-文件"><a href="#修改点1-添加屏相关的-dtsi-文件" class="headerlink" title="修改点1. 添加屏相关的 dtsi 文件"></a>修改点1. 添加屏相关的 dtsi 文件</h4><p>咨询 FAE 要到 LCM 相关的 panel dtsi 文件. 添加到 src/kernel/msm-3.18/arch/arm/boot/dts/qcom/ 目录下:<br>eg: src/kernel/msm-3.18/arch/arm/boot/dts/qcom/dsi-panel-st7703_boe55-video.dtsi<br>此 dtsi 仅仅是在 mdss_mdp 节点下追加了一个子节点。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&amp;mdss_mdp &#123;</span><br><span class="line">        dsi_boe55_st7703_720p_video: qcom,dsi_boe55_st7703_720p_video &#123;</span><br><span class="line">                qcom,mdss-dsi-panel-name = <span class="string">"dsi_boe55_st7703_720p_video"</span>;</span><br><span class="line">                ... ...</span><br><span class="line">        &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>问1: msm8937 是 64 位的处理器, 为什么是在 arch/arm/ 下添加文件, 而不是在 arch/arm64 目录下添加?<br>答1: 其实 arch/arm64 是通过软链接方式链接到 arch/arm 目录下，因此不管在哪个目录修改都是可以生效的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[wangbing@ubuntu: ~/src/kernel/msm-3.18/arch/arm64/boot/dts]$ ls -l</span><br><span class="line">lrwxrwxrwx 1 wangbing wangbing   26 Apr  3 23:07 qcom -&gt; ../../../arm/boot/dts/qcom</span><br></pre></td></tr></table></figure>
+<h4 id="修改点2-包含屏参数-dtsi-文件到-dts-中"><a href="#修改点2-包含屏参数-dtsi-文件到-dts-中" class="headerlink" title="修改点2. 包含屏参数 dtsi 文件到 dts 中"></a>修改点2. 包含屏参数 dtsi 文件到 dts 中</h4><p>在 src/kernel/msm-3.18/arch/arm/boot/dts/qcom/msm8937-mdss-panels.dtsi 包含上一个修改点中添加的 dtsi 文件。目的是为了让追加的 panel 的 dtsi 在编译 dtb 的时候能够被编译到。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"dsi-panel-st7703_boe55-video.dtsi"</span></span></span><br></pre></td></tr></table></figure>
+<p>问1: dtb 编译的时候是如何确定哪些文件(哪些 dts 和 dtsi 文件)会被编译呢?<br>答1: 编译 dtb 文件也是根据 Makefile 规则编译的，在 src/kernel/msm-3.18/arch/arm/boot/dts/qcom/ 目录的 Makefile 决定哪些 dts 文件会编译成 dtb。编译的时候会编译 Makefile 中指定的 dtb 文件, 而这些 dtb 文件对应的源文件(dts文件)会依赖于相关的 dtsi 文件。编译的时候就会将 dts 以及依赖的 dtsi 一起编译(类似于c文件依赖h文件一样)。</p>
+<p>问2: dsi-panel-st7703_boe55-video.dtsi 文件的依赖关系是?<br>答2: 一直根据 grep 搜索对应关键字, 就可以找到依赖关系:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">msm8937-mdss-panels.dtsi:34:    <span class="comment">#include "dsi-panel-st7703_boe55-video.dtsi"</span></span><br><span class="line">msm8937-mtp.dtsi:320:           <span class="comment">#include "msm8937-mdss-panels.dtsi"</span></span><br><span class="line">msm8937-pmi8937-mtp.dtsi:15:    <span class="comment">#include "msm8937-mtp.dtsi"</span></span><br><span class="line">msm8937-pmi8937-mtp.dts:17:     <span class="comment">#include "msm8937-pmi8937-mtp.dtsi"</span></span><br><span class="line">Makefile:196:                   msm8937-pmi8937-mtp.dtb \</span><br></pre></td></tr></table></figure>
+<h4 id="修改点3-设置默认屏驱动-可选"><a href="#修改点3-设置默认屏驱动-可选" class="headerlink" title="修改点3. 设置默认屏驱动(可选)"></a>修改点3. 设置默认屏驱动(可选)</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">msm8937-mtp.dtsi (kernel\msm<span class="number">-3.18</span>\arch\arm64\boot\dts\qcom)</span><br><span class="line"> </span><br><span class="line"> &amp;mdss_dsi0 &#123;</span><br><span class="line">+        qcom,dsi-pref-prim-pan = &lt;&amp;dsi_hsd_ili9881_720p_video&gt;;</span><br><span class="line">         pinctrl-names = <span class="string">"mdss_default"</span>, <span class="string">"mdss_sleep"</span>;</span><br><span class="line">         pinctrl<span class="number">-0</span> = &lt;&amp;mdss_dsi_active &amp;mdss_te_active&gt;;</span><br><span class="line">         pinctrl<span class="number">-1</span> = &lt;&amp;mdss_dsi_suspend &amp;mdss_te_suspend&gt;;</span><br><span class="line">         qcom,platform-te-gpio = &lt;&amp;tlmm <span class="number">24</span> <span class="number">0</span>&gt;;</span><br><span class="line">         qcom,platform-enable-gpio = &lt;&amp;tlmm <span class="number">99</span> <span class="number">0</span>&gt;;</span><br><span class="line">         qcom,platform-reset-gpio = &lt;&amp;tlmm <span class="number">60</span> <span class="number">0</span>&gt;;</span><br><span class="line">         qcom,platform-bklight-en-gpio = &lt;&amp;tlmm <span class="number">98</span> <span class="number">0</span>&gt;;</span><br><span class="line"> &#125;;</span><br><span class="line"> </span><br><span class="line">+&amp;dsi_hsd_ili9881_720p_video &#123;</span><br><span class="line">+        qcom,panel-supply-entries = &lt;&amp;dsi_panel_pwr_supply&gt;;</span><br><span class="line">+        qcom,mdss-dsi-pan-fps-update = <span class="string">"dfps_immediate_porch_mode_vfp"</span>;</span><br><span class="line">+&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="三-LCD-背光"><a href="#三-LCD-背光" class="headerlink" title="三. LCD 背光"></a>三. LCD 背光</h2><h3 id="3-1-lk-阶段背光驱动"><a href="#3-1-lk-阶段背光驱动" class="headerlink" title="3.1 lk 阶段背光驱动"></a>3.1 lk 阶段背光驱动</h3><h4 id="3-1-1-点亮背光位置"><a href="#3-1-1-点亮背光位置" class="headerlink" title="3.1.1 点亮背光位置"></a>3.1.1 点亮背光位置</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/app/aboot/aboot.c</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">aboot_init</span><span class="params">(<span class="keyword">const</span> struct app_descriptor *app)</span></span></span><br><span class="line"><span class="function">        <span class="title">target_display_init</span><span class="params">(device.display_panel)</span></span>;</span><br><span class="line">                gcdb_display_init(oem.panel, MDP_REV_50, (<span class="keyword">void</span> *)MIPI_FB_ADDR);</span><br><span class="line">                        <span class="comment">/* 根据 panel 的协议绑定对应的背光控制函数 */</span></span><br><span class="line">                        <span class="keyword">if</span> (pan_type == PANEL_TYPE_DSI)</span><br><span class="line">                                panel.bl_func = mdss_dsi_bl_enable;</span><br><span class="line">                        msm_display_init(&amp;panel);</span><br><span class="line">                                pdata-&gt;power_func(<span class="number">1</span>, &amp;(panel-&gt;panel_info);</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> mdss_dsi_bl_enable(<span class="keyword">uint8_t</span> enable)</span><br><span class="line">        panel_backlight_ctrl(enable);</span><br><span class="line">                target_backlight_ctrl(panelstruct.backlightinfo, enable);</span><br><span class="line">                        msm8952_wled_backlight_ctrl(enable);</span><br><span class="line">                                qpnp_wled_enable_backlight(enable);</span><br><span class="line">                                        <span class="comment">/* #define QPNP_WLED_MAX_BR_LEVEL 1638 */</span></span><br><span class="line">                                        qpnp_wled_set_level(gwled, QPNP_WLED_MAX_BR_LEVEL);</span><br><span class="line">                                        qpnp_wled_enable(gwled, gwled-&gt;ctrl_base, enable);</span><br><span class="line">                                qpnp_ibb_enable(enable);</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-kernel-阶段背光驱动"><a href="#3-2-kernel-阶段背光驱动" class="headerlink" title="3.2 kernel 阶段背光驱动"></a>3.2 kernel 阶段背光驱动</h3><h4 id="3-2-1-对上抛出的接口"><a href="#3-2-1-对上抛出的接口" class="headerlink" title="3.2.1 对上抛出的接口"></a>3.2.1 对上抛出的接口</h4><p>LCD 背光驱动是通过内核提供的 LED 子系统注册的驱动，因此对应用层抛出的接口创建在 <code>/sys/class/leds/</code> 目录下。</p>
+<pre><code>C:\Users\wangbing&gt; adb shell
+
+# 读取手机当前设置的背光等级
+android:/ # cat /sys/class/leds/lcd-backlight/brightness
+74
+
+# 设置背光等级为 100/255(手机变得更亮)
+android:/ # echo 100 &gt; /sys/class/leds/lcd-backlight/brightness
+android:/ # cat /sys/class/leds/lcd-backlight/brightness
+100
+</code></pre><p>如何查看 logcat log 确认当前设置的背光值, 可以通过 <code>DisplayPowerController: Animating brightness:</code> 关键字确认。</p>
+<pre><code>C:\Users\wangbing&gt;adb shell
+android:/ # logcat -s DisplayPowerController | grep &quot;brightness&quot;
+01-01 01:26:21.588  1206  1246 I DisplayPowerController: Animating brightness: target=102, rate=0, asusAnimator=false
+01-01 01:26:21.588  1206  1246 I DisplayPowerController: Animating brightness: target=102, rate=0, asusAnimator=false
+01-01 01:26:21.591  1206  1246 I DisplayPowerController: Animating brightness: target=102, rate=0, asusAnimator=false
+</code></pre><h4 id="3-2-2-驱动注册流程"><a href="#3-2-2-驱动注册流程" class="headerlink" title="3.2.2 驱动注册流程"></a>3.2.2 驱动注册流程</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/kernel/msm-3.18/drivers/video/msm/mdss/mdss_fb.c</span></span><br><span class="line"></span><br><span class="line">module_init(mdss_fb_init);</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> __<span class="function">init <span class="title">mdss_fb_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function">        <span class="title">platform_driver_register</span><span class="params">(&amp;mdss_fb_driver)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">platform_driver</span> <span class="title">mdss_fb_driver</span> = &#123;</span></span><br><span class="line">        .probe    = mdss_fb_probe,</span><br><span class="line">        .remove   = mdss_fb_remove,</span><br><span class="line">        .suspend  = mdss_fb_suspend,</span><br><span class="line">        .resume   = mdss_fb_resume,</span><br><span class="line">        .shutdown = mdss_fb_shutdown,</span><br><span class="line">        .driver   = &#123;</span><br><span class="line">                .name = <span class="string">"mdss_fb"</span>,</span><br><span class="line">                .of_match_table = mdss_fb_dt_match,</span><br><span class="line">                .pm = &amp;mdss_fb_pm_ops,</span><br><span class="line">        &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* LED 设备，设备注册成功后，将会创建 /sys/class/leds/lcd-backlight 目录 */</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">led_classdev</span> <span class="title">backlight_led</span> = &#123;</span></span><br><span class="line">        .name           = <span class="string">"lcd-backlight"</span>,              <span class="comment">/* LED 设备的名字 */</span></span><br><span class="line">        .brightness     = <span class="number">127</span>,                          <span class="comment">/* 默认亮度为 127 */</span></span><br><span class="line">        .brightness_set = mdss_fb_set_bl_brightness,    <span class="comment">/* 设置亮度的函数 */</span></span><br><span class="line">        .max_brightness = <span class="number">255</span>,                          <span class="comment">/* 最大亮度为 255 */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 注册 LED 设备的位置 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">mdss_fb_probe</span><span class="params">(struct platform_device *pdev)</span></span></span><br><span class="line">        backlight_led.brightness = mfd-&gt;panel_info-&gt;brightness_max;</span><br><span class="line">        backlight_led.max_brightness = mfd-&gt;panel_info-&gt;brightness_max;</span><br><span class="line">        <span class="keyword">if</span> (led_classdev_register(&amp;pdev-&gt;dev, &amp;backlight_led))</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 设置 LED 亮度的函数 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mdss_fb_set_bl_brightness</span><span class="params">(struct led_classdev *led_cdev, <span class="keyword">enum</span> led_brightness value)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">        <span class="comment">/* 如果传入的值比支持设置的最大值要大，则修改为支持的最大值 */</span></span></span><br><span class="line"><span class="function">        <span class="title">if</span> <span class="params">(value &gt; mfd-&gt;panel_info-&gt;brightness_max)</span></span></span><br><span class="line"><span class="function">                value </span>= mfd-&gt;panel_info-&gt;brightness_max;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 加了个 log 将 value 和 bl_lvl 打印出来，确认到这里的映射关系为: bl_lvl = value / 255 * 4096 */</span></span><br><span class="line">        <span class="comment">/* 说明这里是将上层传递过来的 0~255 的亮度等级转化为实际 PMIC 支持的亮度等级 */</span></span><br><span class="line">        <span class="comment">/* This maps android backlight level 0 to 255 into driver backlight level 0 to bl_max with rounding */</span></span><br><span class="line">        MDSS_BRIGHT_TO_BL(bl_lvl, value, mfd-&gt;panel_info-&gt;bl_max, mfd-&gt;panel_info-&gt;brightness_max);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 设置屏幕背光，最终还是调用 panel 中绑定的函数 */</span></span><br><span class="line">        mdss_fb_set_backlight(mfd, bl_lvl);</span><br><span class="line">                pdata-&gt;set_backlight(pdata, bl_lvl);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 搜索看看 set_backlight 在哪里绑定了操作函数 */</span></span><br><span class="line">---- set_backlight Matches (13 in 5 files) ----</span><br><span class="line">mdss_dsi_panel_init in mdss_dsi_panel.c (msm\mdss) : 	ctrl_pdata-&gt;panel_data.set_backlight = mdss_dsi_panel_bl_ctrl;</span><br><span class="line">mdss_edp_device_register in mdss_edp.c (msm\mdss) : 	edp_drv-&gt;panel_data.set_backlight = mdss_edp_set_backlight;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 实际控制背光的位置在这里 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mdss_dsi_panel_bl_ctrl</span><span class="params">(struct mdss_panel_data *pdata, u32 bl_level)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">        <span class="comment">/* 控制 PMI 的 WLED 引脚控制背光 */</span></span></span><br><span class="line"><span class="function">        <span class="title">led_trigger_event</span><span class="params">(bl_led_trigger, bl_level)</span></span>;</span><br></pre></td></tr></table></figure>
+<h4 id="3-2-3-自问自答"><a href="#3-2-3-自问自答" class="headerlink" title="3.2.3 自问自答"></a>3.2.3 自问自答</h4><p>问1: 背光驱动没有实现 brightness_get 接口，为什么却可以通过 cat /sys/class/leds/lcd-backlight/brightness 节点获得亮度值?<br>答1: 看了下读 brightness 节点的函数，在读取 /sys/class/leds/lcd-backlight/brightness 节点时。<br>如果定义了 brightness_get 函数，则将会获取到的亮度值，传递给 backlight_led-&gt;brightness，然后将 backlight_led-&gt;brightness 值返回；<br>如果没有定义 brightness_get 函数，则直接返回 backlight_led-&gt;brightness 的值。</p>
+<p>问2: 现在的疑问就变成了，为什么没有通过 brightness_get 获取亮度值，backlight_led-&gt;brightness 也是准确的?<br>答2: 看了下写 brightness 节点的函数，在写入亮度值 /sys/class/leds/lcd-backlight/brightness 节点时。<br>同时将写入的值记录到了 backlight_led-&gt;brightness 变量中，因此读取的时候其实获取到的是上一次写入的值。</p>
+<p>上述两个疑问涉及到的代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/kernel/msm-3.18/drivers/leds/led-class.c</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 定义了属性节点 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="title">DEVICE_ATTR_RW</span><span class="params">(brightness)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 读属性时调用的函数 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> ssize_t <span class="title">brightness_show</span><span class="params">(struct device *dev, struct device_attribute *attr, <span class="keyword">char</span> *buf)</span></span></span><br><span class="line">        |-- struct led_classdev *led_cdev = dev_get_drvdata(dev);</span><br><span class="line">        |-- led_update_brightness(led_cdev);</span><br><span class="line">        |       |</span><br><span class="line">        |       |   <span class="comment">// 如果定义了 brightness_get 函数，则将获取到的亮度值记录到 led_cdev-&gt;brightness</span></span><br><span class="line">        |       |-- <span class="keyword">if</span> (led_cdev-&gt;brightness_get)</span><br><span class="line">        |                led_cdev-&gt;brightness = led_cdev-&gt;brightness_get(led_cdev);</span><br><span class="line">        |</span><br><span class="line">        |   <span class="comment">// 这里直接将 led_cdev-&gt;brightness 返回</span></span><br><span class="line">        |-- <span class="keyword">return</span> <span class="built_in">sprintf</span>(buf, <span class="string">"%u\n"</span>, led_cdev-&gt;brightness);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 写属性时调用的函数 */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> ssize_t <span class="title">brightness_store</span><span class="params">(struct device *dev, struct device_attribute *attr, <span class="keyword">const</span> <span class="keyword">char</span> *buf, <span class="keyword">size_t</span> size)</span></span></span><br><span class="line">        |-- struct led_classdev *led_cdev = dev_get_drvdata(dev);</span><br><span class="line">        |-- ret = kstrtoul(buf, <span class="number">10</span>, &amp;state);</span><br><span class="line">        |-- __led_set_brightness(led_cdev, state);</span><br><span class="line">                |</span><br><span class="line">                |   <span class="comment">// 先将写进的值保存到 led_cdev-&gt;brightness 中</span></span><br><span class="line">                |-- led_cdev-&gt;brightness = value;</span><br><span class="line">                |</span><br><span class="line">                |   <span class="comment">// 接着调用 brightness_set 函数控制 PMI 调整背光</span></span><br><span class="line">                |-- led_cdev-&gt;brightness_set(led_cdev, value);</span><br></pre></td></tr></table></figure>
+<h2 id="四-LCD-上电"><a href="#四-LCD-上电" class="headerlink" title="四. LCD 上电"></a>四. LCD 上电</h2><h3 id="4-1-LCD-上电前言"><a href="#4-1-LCD-上电前言" class="headerlink" title="4.1 LCD 上电前言"></a>4.1 LCD 上电前言</h3><p>每一块 lcd ic 在 spec 上都会详细的描述它们上电的时序要求。以往工厂生产的时候，经常会出现由于上电时序不对或者是各路电之前的延时过短不符合 spec 规范导致的花屏、读不到 panel id 甚至烧坏 ic 的情况。因此在阅读屏驱动框架的时候，必须要准确的找到上电这块的代码位置。<br>目前我们公司大部分的 LCD 都有两路电，一路是给 ic 供电的 IOVDD，另一路是加在玻璃上的偏置电压(VSP、VSN)，同时在 spec 上电时序的描述中，还会多加一路 ic 的 reset 信号，spec 上会给出这三者详细的上电掉电时序要求。<br>我们要做的就是去 check 这个位置，看看是不是符合 spec 要求，不符合就将其修改。一般来说修改也仅仅是修改偏置电压，交换 reset 和偏置电压的前后顺序，需改时序间的延时之类的。</p>
+<h3 id="4-2-lk-阶段开机上电位置"><a href="#4-2-lk-阶段开机上电位置" class="headerlink" title="4.2 lk 阶段开机上电位置"></a>4.2 lk 阶段开机上电位置</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file: src/bootable/bootloader/lk/app/aboot/aboot.c</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">aboot_init</span><span class="params">(<span class="keyword">const</span> struct app_descriptor *app)</span></span></span><br><span class="line"><span class="function">        <span class="title">target_display_init</span><span class="params">(device.display_panel)</span></span>;</span><br><span class="line">                gcdb_display_init(oem.panel, MDP_REV_50, (<span class="keyword">void</span> *)MIPI_FB_ADDR);</span><br><span class="line">                        <span class="comment">/* 根据 panel 的协议绑定对应的上电函数 */</span></span><br><span class="line">                        <span class="keyword">if</span> (pan_type == PANEL_TYPE_DSI)</span><br><span class="line">                                panel.power_func = mdss_dsi_panel_power;</span><br><span class="line">                        msm_display_init(&amp;panel);</span><br><span class="line">                                pdata-&gt;power_func(<span class="number">1</span>, &amp;(panel-&gt;panel_info);</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> mdss_dsi_panel_power(<span class="keyword">uint8_t</span> enable, struct msm_panel_info *pinfo)</span><br><span class="line">        <span class="keyword">if</span> (enable) &#123;</span><br><span class="line">                target_ldo_ctrl(enable, pinfo);</span><br><span class="line">                mdss_dsi_panel_reset(enable);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mdss_dsi_panel_reset(enable);</span><br><span class="line">                target_ldo_ctrl(enable, pinfo);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> target_ldo_ctrl(<span class="keyword">uint8_t</span> enable, struct msm_panel_info *pinfo)</span><br><span class="line">        <span class="keyword">if</span> (enable) &#123;</span><br><span class="line">                regulator_enable(ldo_num);      <span class="comment">/* 使能 IOVDD */</span></span><br><span class="line">                wled_init(pinfo);               <span class="comment">/* 配置 VSP VSN 电压电流 */</span></span><br><span class="line">                qpnp_ibb_enable(<span class="literal">true</span>);          <span class="comment">/* 使能 VSP VSN */</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                ... ...</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="4-3-kernel-阶段上下电位置"><a href="#4-3-kernel-阶段上下电位置" class="headerlink" title="4.3 kernel 阶段上下电位置"></a>4.3 kernel 阶段上下电位置</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mdss_dsi_panel_power_ctrl</span><br><span class="line">        mdss_dsi_panel_power_on</span><br><span class="line">                msm_dss_enable_vreg</span><br></pre></td></tr></table></figure>
+<h2 id="五-LCD-静电"><a href="#五-LCD-静电" class="headerlink" title="五. LCD 静电"></a>五. LCD 静电</h2><h3 id="5-1-使能-esd-check-功能"><a href="#5-1-使能-esd-check-功能" class="headerlink" title="5.1 使能 esd check 功能"></a>5.1 使能 esd check 功能</h3><p>屏 dtsi 中增加以下属性以开启 esd check 功能：</p>
+<pre><code>&amp;mdss_mdp {
+    dsi_co55swr8_st7703_720p_video: qcom,dsi_co55swr8_st7703_720p_video {
+        ... ...
+        /* 使能 esd check 机制 */
+        qcom,esd-check-enabled;
+
+        /* 指定 esd check 的 command，cmd 最后一次字节是 check 的寄存器 */
+        qcom,mdss-dsi-panel-status-command = [
+                14 01 00 01 05 00 01 68
+                06 01 00 01 05 00 01 09
+                14 01 00 01 05 00 01 CC
+                14 01 00 01 05 00 01 AF
+        ];
+
+        /* 指定 esd check 的命令模式 */
+        qcom,mdss-dsi-panel-status-command-state = &quot;dsi_lp_mode&quot;;
+
+        /* 指定 esd check 的校验模式 */
+        qcom,mdss-dsi-panel-status-check-mode = &quot;reg_read&quot;;
+
+        /* 在 command 中指定指定过了 check 的寄存器，这里指定 check 对应寄存器的前几个字节 */
+        qcom,mdss-dsi-panel-status-read-length = &lt;1 3 1 1&gt;;
+
+        /* 这个属性的含义还在摸索中 */
+        qcom,mdss-dsi-panel-max-error-count = &lt;2&gt;;
+
+        /* 指定 esd check 读取的寄存器的标准值 */
+        qcom,mdss-dsi-panel-status-value = &lt;0xC0&gt; , &lt;0x80 0x73 0x04&gt;, &lt;0x0B&gt;,&lt;0xFD&gt;;
+        ... ...
+    };
+};
+</code></pre><h3 id="5-2-追踪-esd-check-流程"><a href="#5-2-追踪-esd-check-流程" class="headerlink" title="5.2 追踪 esd check 流程"></a>5.2 追踪 esd check 流程</h3><p>在 mdss_dsi.c 文件中解析 dts 中屏节点中设置的 esd 相关属性，相关代码流程如下：</p>
+<pre><code>// file: src/kernel/msm-3.18/drivers/video/msm/mdss/mdss_dsi.c
+static int mdss_dsi_ctrl_probe(struct platform_device *pdev)
+    mdss_dsi_config_panel(pdev, index);
+
+        /* 根据 panel_cfg 指定的 panel 找到对应的 dts 节点 */
+        mdss_dsi_find_panel_of_node(pdev, panel_cfg);
+
+        // file: src/kernel/msm-3.18/drivers/video/msm/mdss/mdss_dsi_panel.c
+        mdss_dsi_panel_init(dsi_pan_node, ctrl_pdata, ndx);
+            mdss_panel_parse_dt(node, ctrl_pdata);
+                mdss_dsi_parse_panel_features(np, ctrl_pdata);
+
+                    /* 解析 dts 中 esd check 相关的参数 */
+                    mdss_dsi_parse_esd_params(np, ctrl);
+
+    dsi_panel_device_register(pdev, dsi_pan_node, ctrl_pdata);
+
+        /* 根据 status_mode 绑定对应的 esd check 的函数 */
+        if (ctrl_pdata-&gt;status_mode == ESD_REG)
+            ctrl_pdata-&gt;check_status = mdss_dsi_reg_status_check;
+
+// file: src/kernel/msm-3.18/drivers/video/msm/mdss/mdss_dsi_status.c
+module_init(mdss_dsi_status_init);
+    mdss_dsi_status_init
+        INIT_DELAYED_WORK(&amp;pstatus_data-&gt;check_status, check_dsi_ctrl_status);
+            check_dsi_ctrl_status
+                pdsi_status-&gt;mfd-&gt;mdp.check_dsi_status(work, interval);
+                &gt; mdss_check_dsi_ctrl_status
+                    ctrl_pdata-&gt;check_status(ctrl_pdata);
+                    &gt; mdss_dsi_reg_status_check
+
+                        /* 读取寄存器状态 */
+                        mdss_dsi_read_status(ctrl_pdata);
+
+                        /* 校验寄存器状态 */
+                        ctrl_pdata-&gt;check_read_status(ctrl_pdata);
+                        &gt; mdss_dsi_gen_read_status(ctrl_pdata);
+                            mdss_dsi_cmp_panel_reg_v2(ctrl_pdata);
+</code></pre><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">mdss_dsi_parse_esd_params</span><span class="params">(struct device_node *np, struct mdss_dsi_ctrl_pdata *ctrl)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    u32 tmp;</span><br><span class="line">    u32 i, status_len, *lenp;</span><br><span class="line">    <span class="keyword">int</span> rc;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">property</span> *<span class="title">data</span>;</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *<span class="built_in">string</span>;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">mdss_panel_info</span> *<span class="title">pinfo</span> = &amp;<span class="title">ctrl</span>-&gt;<span class="title">panel_data</span>.<span class="title">panel_info</span>;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 获取 esd check 使能的标识位 */</span></span><br><span class="line">    pinfo-&gt;esd_check_enabled = of_property_read_bool(np, <span class="string">"qcom,esd-check-enabled"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 倘若未使能 esd check，此函数直接 return */</span></span><br><span class="line">    <span class="keyword">if</span> (!pinfo-&gt;esd_check_enabled)</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    ctrl-&gt;status_mode = ESD_MAX;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 获取 esd check 的 check mode */</span></span><br><span class="line">    rc = of_property_read_string(np, <span class="string">"qcom,mdss-dsi-panel-status-check-mode"</span>, &amp;<span class="built_in">string</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 根据获取到的 check mode 设置好 ctrl-&gt;status_mode 为对应的宏 */</span></span><br><span class="line">    <span class="keyword">if</span> (!rc) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(<span class="built_in">string</span>, <span class="string">"bta_check"</span>)) &#123;</span><br><span class="line">            ctrl-&gt;status_mode = ESD_BTA;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(<span class="built_in">string</span>, <span class="string">"reg_read"</span>)) &#123;</span><br><span class="line">            ctrl-&gt;status_mode = ESD_REG;</span><br><span class="line">            ctrl-&gt;check_read_status = mdss_dsi_gen_read_status;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(<span class="built_in">string</span>, <span class="string">"reg_read_nt35596"</span>)) &#123;</span><br><span class="line">            ctrl-&gt;status_mode = ESD_REG_NT35596;</span><br><span class="line">            ctrl-&gt;status_error_count = <span class="number">0</span>;</span><br><span class="line">            ctrl-&gt;check_read_status = mdss_dsi_nt35596_read_status;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(<span class="built_in">string</span>, <span class="string">"te_signal_check"</span>)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (pinfo-&gt;mipi.mode == DSI_CMD_MODE) &#123;</span><br><span class="line">                ctrl-&gt;status_mode = ESD_TE;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                pr_err(<span class="string">"TE-ESD not valid for video mode\n"</span>);</span><br><span class="line">                <span class="keyword">goto</span> error;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            pr_err(<span class="string">"No valid panel-status-check-mode string\n"</span>);</span><br><span class="line">            <span class="keyword">goto</span> error;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 对于 ESD_BTA、ESD_BTA、ESD_MAX 这几种 check mode 不需要获取其他的属性参数 */</span> </span><br><span class="line">    <span class="keyword">if</span> ((ctrl-&gt;status_mode == ESD_BTA) || (ctrl-&gt;status_mode == ESD_TE) || (ctrl-&gt;status_mode == ESD_MAX))</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 对于 ESD_REG 和 ESD_REG_NT35596 这两种 check 寄存器状态的模式，需要获取 check 哪些寄存器 */</span> </span><br><span class="line">    mdss_dsi_parse_dcs_cmds(np, &amp;ctrl-&gt;status_cmds, <span class="string">"qcom,mdss-dsi-panel-status-command"</span>, <span class="string">"qcom,mdss-dsi-panel-status-command-state"</span>);</span><br><span class="line"></span><br><span class="line">    rc = of_property_read_u32(np, <span class="string">"qcom,mdss-dsi-panel-max-error-count"</span>, &amp;tmp);</span><br><span class="line">    ctrl-&gt;max_status_error_count = (!rc ? tmp : <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!mdss_dsi_parse_esd_status_len(np, <span class="string">"qcom,mdss-dsi-panel-status-read-length"</span>, &amp;ctrl-&gt;status_cmds_rlen, ctrl-&gt;status_cmds.cmd_cnt)) &#123;</span><br><span class="line">        pinfo-&gt;esd_check_enabled = <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (mdss_dsi_parse_esd_status_len(np, <span class="string">"qcom,mdss-dsi-panel-status-valid-params"</span>, &amp;ctrl-&gt;status_valid_params, ctrl-&gt;status_cmds.cmd_cnt)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!mdss_dsi_parse_esd_check_valid_params(ctrl))</span><br><span class="line">            <span class="keyword">goto</span> error1;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    status_len = <span class="number">0</span>;</span><br><span class="line">    lenp = ctrl-&gt;status_valid_params ?: ctrl-&gt;status_cmds_rlen;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ctrl-&gt;status_cmds.cmd_cnt; ++i)</span><br><span class="line">        status_len += lenp[i];</span><br><span class="line"></span><br><span class="line">    data = of_find_property(np, <span class="string">"qcom,mdss-dsi-panel-status-value"</span>, &amp;tmp);</span><br><span class="line">    tmp /= <span class="keyword">sizeof</span>(u32);</span><br><span class="line">    <span class="keyword">if</span> (!IS_ERR_OR_NULL(data) &amp;&amp; tmp != <span class="number">0</span> &amp;&amp; (tmp % status_len) == <span class="number">0</span>) &#123;</span><br><span class="line">        ctrl-&gt;groups = tmp / status_len;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        pr_err(<span class="string">"%s: Error parse panel-status-value\n"</span>, __func__);</span><br><span class="line">        <span class="keyword">goto</span> error1;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ctrl-&gt;status_value = kzalloc(<span class="keyword">sizeof</span>(u32) * status_len * ctrl-&gt;groups, GFP_KERNEL);</span><br><span class="line">    <span class="keyword">if</span> (!ctrl-&gt;status_value)</span><br><span class="line">        <span class="keyword">goto</span> error1;</span><br><span class="line"></span><br><span class="line">    ctrl-&gt;return_buf = kcalloc(status_len * ctrl-&gt;groups, <span class="keyword">sizeof</span>(<span class="keyword">unsigned</span> <span class="keyword">char</span>), GFP_KERNEL);</span><br><span class="line">    <span class="keyword">if</span> (!ctrl-&gt;return_buf)</span><br><span class="line">        <span class="keyword">goto</span> error2;</span><br><span class="line"></span><br><span class="line">    rc = of_property_read_u32_array(np, <span class="string">"qcom,mdss-dsi-panel-status-value"</span>, ctrl-&gt;status_value, ctrl-&gt;groups * status_len);</span><br><span class="line">    <span class="keyword">if</span> (rc) &#123;</span><br><span class="line">        pr_debug(<span class="string">"%s: Error reading panel status values\n"</span>, __func__);</span><br><span class="line">        <span class="built_in">memset</span>(ctrl-&gt;status_value, <span class="number">0</span>, ctrl-&gt;groups * status_len);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">error2:</span><br><span class="line">    kfree(ctrl-&gt;status_value);</span><br><span class="line">error1:</span><br><span class="line">    kfree(ctrl-&gt;status_valid_params);</span><br><span class="line">    kfree(ctrl-&gt;status_cmds_rlen);</span><br><span class="line">error:</span><br><span class="line">    pinfo-&gt;esd_check_enabled = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">mdss_dsi_read_status</span><span class="params">(struct mdss_dsi_ctrl_pdata *ctrl)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i, rc, *lenp;</span><br><span class="line">    <span class="keyword">int</span> start = <span class="number">0</span>;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">dcs_cmd_req</span> <span class="title">cmdreq</span>;</span></span><br><span class="line"></span><br><span class="line">    rc = <span class="number">1</span>;</span><br><span class="line">    lenp = ctrl-&gt;status_valid_params ?: ctrl-&gt;status_cmds_rlen;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ctrl-&gt;status_cmds.cmd_cnt; ++i) &#123;</span><br><span class="line">        <span class="built_in">memset</span>(&amp;cmdreq, <span class="number">0</span>, <span class="keyword">sizeof</span>(cmdreq));</span><br><span class="line">        cmdreq.cmds = ctrl-&gt;status_cmds.cmds + i;</span><br><span class="line">        cmdreq.cmds_cnt = <span class="number">1</span>;</span><br><span class="line">        cmdreq.flags = CMD_REQ_COMMIT | CMD_REQ_RX;</span><br><span class="line">        cmdreq.rlen = ctrl-&gt;status_cmds_rlen[i];</span><br><span class="line">        cmdreq.cb = <span class="literal">NULL</span>;</span><br><span class="line">        cmdreq.rbuf = ctrl-&gt;status_buf.data;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (ctrl-&gt;status_cmds.link_state == DSI_LP_MODE)</span><br><span class="line">            cmdreq.flags |= CMD_REQ_LP_MODE;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (ctrl-&gt;status_cmds.link_state == DSI_HS_MODE)</span><br><span class="line">            cmdreq.flags |= CMD_REQ_HS_MODE;</span><br><span class="line"></span><br><span class="line">        rc = mdss_dsi_cmdlist_put(ctrl, &amp;cmdreq);</span><br><span class="line">        <span class="keyword">if</span> (rc &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            pr_err(<span class="string">"%s: get status: fail\n"</span>, __func__);</span><br><span class="line">            <span class="keyword">return</span> rc;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">memcpy</span>(ctrl-&gt;return_buf + start, ctrl-&gt;status_buf.data, lenp[i]);</span><br><span class="line">        start += lenp[i];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> rc;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">bool</span> <span class="title">mdss_dsi_cmp_panel_reg_v2</span><span class="params">(struct mdss_dsi_ctrl_pdata *ctrl)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i, j;</span><br><span class="line">    <span class="keyword">int</span> len = <span class="number">0</span>, *lenp;</span><br><span class="line">    <span class="keyword">int</span> group = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    lenp = ctrl-&gt;status_valid_params ?: ctrl-&gt;status_cmds_rlen;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ctrl-&gt;status_cmds.cmd_cnt; i++)</span><br><span class="line">        len += lenp[i];</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 这里比对寄存器中读取出来的值和 dts 中理论上寄存器中的值 */</span></span><br><span class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; ctrl-&gt;groups; ++j)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; len; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            printk(<span class="string">"lcd esd return_buf[%d] = 0x%x  status_value = 0x%x %s %d\n"</span>, i, ctrl-&gt;return_buf[i], ctrl-&gt;status_value[group + i],  __func__, __LINE__);</span><br><span class="line">            <span class="keyword">if</span> (ctrl-&gt;return_buf[i] != ctrl-&gt;status_value[group + i])</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (i == len)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        group += len;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="六-LCD-框架"><a href="#六-LCD-框架" class="headerlink" title="六. LCD 框架"></a>六. LCD 框架</h2><h3 id="6-1-lk-阶段-lcd-框架分析"><a href="#6-1-lk-阶段-lcd-框架分析" class="headerlink" title="6.1 lk 阶段 lcd 框架分析"></a>6.1 lk 阶段 lcd 框架分析</h3><p>对于 i2c、spi、usb 总线下的设备，写驱动程序的时候，涉及到两部分，分别是总线驱动和设备驱动。以 i2c 为例，总线驱动和设备驱动各自有对应的分工，总线驱动负责控制 i2c 控制器(片上外设)，将 i2c 控制器寄存器相关的控制逻辑封装成符合 i2c 规范的 start、stop、ask、sendbyte、readbyte 等接口函数。至于设备驱动，只需要根据设备的 datasheet 并按照总线的规范调用总线提供的接口函数，就可以实现和设备的通信。<br>和我们熟悉的 i2c、spi、usb 一样，mipi dsi 协议也是一样的，也分为总线驱动和设备驱动。我们分析框架，对于总线驱动部分只需要找到对应的接口函数即可，暂不去深入分析 mipi 总线驱动，重点看看点亮一块屏，设备驱动端上电时序，如下 init code，以及让 lcd 显示一帧图片需要如何操作。</p>
+<p>未完待续。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/maziot/weixin.png" alt="Paul Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/maziot/alipay.png" alt="Paul Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/qcom/" rel="tag"># qcom</a>
+          
+            <a href="/tags/lcd/" rel="tag"># lcd</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/11/odm-tp-debug-flow/" rel="next" title="[ODM] TP 相关 debug 流程">
+                <i class="fa fa-chevron-left"></i> [ODM] TP 相关 debug 流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/20/odm-tp-gesture-warkup-screen-slow/" rel="prev" title="[ODM] TP 手势唤醒屏幕亮起来慢">
+                [ODM] TP 手势唤醒屏幕亮起来慢 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/maziot/avatar.jpg" alt="Paul Wang">
+            
+              <p class="site-author-name" itemprop="name">Paul Wang</p>
+              <p class="site-description motion-element" itemprop="description">但行好事 莫问前程</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:mz8023yt@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/mz8023yt" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/30fc01f695b9" target="_blank" title="Jianshu"><i class="fa fa-fw fa-book"></i>Jianshu</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://mipi.org/" title="mipi" target="_blank">mipi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://git-scm.com/" title="git" target="_blank">git</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hexo.io/" title="hexo" target="_blank">hexo</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com/" title="next" target="_blank">next</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ezgif.com/" title="gif" target="_blank">gif</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fontawesome.dashgame.com/" title="font" target="_blank">font</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kernel.org/" title="kernel" target="_blank">kernel</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一-LCD-兼容"><span class="nav-text">一. LCD 兼容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-lk-阶段启动流程概览"><span class="nav-text">1.1 lk 阶段启动流程概览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-lk-阶段-app-启动流程"><span class="nav-text">1.2 lk 阶段 app 启动流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-lk-阶段-lcd-兼容原理"><span class="nav-text">1.3 lk 阶段 lcd 兼容原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#兼容原理概述"><span class="nav-text">兼容原理概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#兼容框架分析"><span class="nav-text">兼容框架分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#标号1-依次遍历代码中的兼容的-lcd-驱动做初始化操作"><span class="nav-text">标号1. 依次遍历代码中的兼容的 lcd 驱动做初始化操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#标号2-根据-panel-name-解析-supp-panels-数组，得到-panel-的编号"><span class="nav-text">标号2. 根据 panel_name 解析 supp_panels 数组，得到 panel 的编号</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#标号3-根据解析出来-panel-编号，绑定对应的-lcd-驱动函数"><span class="nav-text">标号3. 根据解析出来 panel 编号，绑定对应的 lcd 驱动函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#标号4标号5-探测位置"><span class="nav-text">标号4标号5. 探测位置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-kernel-阶段-lcd-兼容原理"><span class="nav-text">1.4 kernel 阶段 lcd 兼容原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#兼容原理概述-1"><span class="nav-text">兼容原理概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#兼容框架分析-1"><span class="nav-text">兼容框架分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-LCD-移植"><span class="nav-text">二. LCD 移植</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-lk-阶段-lcd-移植流程"><span class="nav-text">2.1 lk 阶段 lcd 移植流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#修改点1-屏参数头文件"><span class="nav-text">修改点1. 屏参数头文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#修改点2-target-display-c"><span class="nav-text">修改点2. target_display.c</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#修改点3-oem-panel-c"><span class="nav-text">修改点3. oem_panel.c</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-kernel-阶段-lcd-移植流程"><span class="nav-text">2.2 kernel 阶段 lcd 移植流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#修改点1-添加屏相关的-dtsi-文件"><span class="nav-text">修改点1. 添加屏相关的 dtsi 文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#修改点2-包含屏参数-dtsi-文件到-dts-中"><span class="nav-text">修改点2. 包含屏参数 dtsi 文件到 dts 中</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#修改点3-设置默认屏驱动-可选"><span class="nav-text">修改点3. 设置默认屏驱动(可选)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三-LCD-背光"><span class="nav-text">三. LCD 背光</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-lk-阶段背光驱动"><span class="nav-text">3.1 lk 阶段背光驱动</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-1-点亮背光位置"><span class="nav-text">3.1.1 点亮背光位置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-kernel-阶段背光驱动"><span class="nav-text">3.2 kernel 阶段背光驱动</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-1-对上抛出的接口"><span class="nav-text">3.2.1 对上抛出的接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-2-驱动注册流程"><span class="nav-text">3.2.2 驱动注册流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-3-自问自答"><span class="nav-text">3.2.3 自问自答</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四-LCD-上电"><span class="nav-text">四. LCD 上电</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-LCD-上电前言"><span class="nav-text">4.1 LCD 上电前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-lk-阶段开机上电位置"><span class="nav-text">4.2 lk 阶段开机上电位置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-kernel-阶段上下电位置"><span class="nav-text">4.3 kernel 阶段上下电位置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五-LCD-静电"><span class="nav-text">五. LCD 静电</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-使能-esd-check-功能"><span class="nav-text">5.1 使能 esd check 功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-追踪-esd-check-流程"><span class="nav-text">5.2 追踪 esd check 流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六-LCD-框架"><span class="nav-text">六. LCD 框架</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-lk-阶段-lcd-框架分析"><span class="nav-text">6.1 lk 阶段 lcd 框架分析</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Paul Wang</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">309k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">4:false</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'mz8023yt',
+            repo: 'blog.comments',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '41b269fc8cc71a77e91b3485769b325e249b15dd',
+            
+                client_id: '3b0f546a740181c255a9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('3');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

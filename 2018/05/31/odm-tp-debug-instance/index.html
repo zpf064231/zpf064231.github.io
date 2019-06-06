@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/maziot/maziot-apple.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/maziot/maziot-32x32.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/maziot/maziot-16x16.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/maziot/maziot.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前言TP 这块出现问题，条件允许的话，一定要第一时间拿到不良机，使用不良机复现问题，在线调试。这里说的在线调试是指通过 adb 实时打印 log。实时打印 kernel log 可以通过下面几条命令： dmesg -w | grep -E &amp;lt;keyword&amp;gt; logcat -b kernel | grep -E &amp;lt;keyword&amp;gt; 实时打印 main log 可以通过下面命">
+<meta name="keywords" content="qcom,touch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[ODM] TP 相关 debug 实例">
+<meta property="og:url" content="http://yoursite.com/2018/05/31/odm-tp-debug-instance/index.html">
+<meta property="og:site_name" content="Paul&#39;s blog">
+<meta property="og:description" content="前言TP 这块出现问题，条件允许的话，一定要第一时间拿到不良机，使用不良机复现问题，在线调试。这里说的在线调试是指通过 adb 实时打印 log。实时打印 kernel log 可以通过下面几条命令： dmesg -w | grep -E &amp;lt;keyword&amp;gt; logcat -b kernel | grep -E &amp;lt;keyword&amp;gt; 实时打印 main log 可以通过下面命">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-06-06T09:42:25.198Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[ODM] TP 相关 debug 实例">
+<meta name="twitter:description" content="前言TP 这块出现问题，条件允许的话，一定要第一时间拿到不良机，使用不良机复现问题，在线调试。这里说的在线调试是指通过 adb 实时打印 log。实时打印 kernel log 可以通过下面几条命令： dmesg -w | grep -E &amp;lt;keyword&amp;gt; logcat -b kernel | grep -E &amp;lt;keyword&amp;gt; 实时打印 main log 可以通过下面命">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/31/odm-tp-debug-instance/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>[ODM] TP 相关 debug 实例 | Paul's blog</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Paul's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">学而不思则罔 思而不学则殆</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-music">
+    <a href="/music/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-headphones"></i> <br>音乐</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/31/odm-tp-debug-instance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Paul Wang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/maziot/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Paul's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">[ODM] TP 相关 debug 实例
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-31 09:14:55" itemprop="dateCreated datePublished" datetime="2018-05-31T09:14:55+08:00">2018-05-31</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-06 17:42:25" itemprop="dateModified" datetime="2019-06-06T17:42:25+08:00">2019-06-06</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Experience/" itemprop="url" rel="index"><span itemprop="name">Experience</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/31/odm-tp-debug-instance/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count gitment-comments-count" data-xid="/2018/05/31/odm-tp-debug-instance/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">8.2k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">7 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>TP 这块出现问题，条件允许的话，一定要第一时间拿到不良机，使用不良机复现问题，在线调试。这里说的在线调试是指通过 adb 实时打印 log。<br>实时打印 kernel log 可以通过下面几条命令：</p>
+<pre><code>dmesg -w | grep -E &lt;keyword&gt;
+logcat -b kernel | grep -E &lt;keyword&gt;
+</code></pre><p>实时打印 main log 可以通过下面命令：</p>
+<pre><code>logcat | grep -E &lt;keyword&gt;
+</code></pre><p>上面使用的是 grep -E 选项，因此 keyword 可以使用正则表达式进行过滤。</p>
+<p>如果没有办法协调到不良机在线调试，对于手势概率性识别的问题，那就很尴尬了，因为很多时候 log 中是看不到手势未识别的情况的。比如说，用户画了20次C手势，我在 log 中看到14次正常，我不知道具体是哪一次未识别，还是说用户这一次画手势的操作手法不规范，很多东西没有办法确认到，没有办法细致的分析。</p>
+<p>TP 手势 log，需要按照以下流程抓取log：</p>
+<ol>
+<li>开启 log 工具抓取 log。</li>
+<li>用另一台手机录制视频，主要录制画手势的手法。</li>
+<li>在设置界面开关下手势。(就算之前开过手势了，也请操作以下，我用这个时间点和视频中的时间点做对应，计算后面画手势动作对应的 log 时间点)</li>
+<li>进行手势操作即可。</li>
+</ol>
+<h3 id="实例1：手势失效"><a href="#实例1：手势失效" class="headerlink" title="实例1：手势失效"></a>实例1：手势失效</h3><p>工厂出现 200pcs 手势功能失效，无法唤醒手势或打开手势对应的 app，从工厂协调 2pcs 不良机，分析过程如下：</p>
+<ol>
+<li><p>确认上层手势开关设置是否生效<br>在设置界面中设置手势的开关，看底层 TP 手势 proc 节点的 log 有没有打印  </p>
+<pre><code>[ 3834.582866] [Paul][HXTP][himax_GESTURE_write][2966] gesture flag: 01111111
+</code></pre><p>确认到有相关 log 打印，从上述 log 确认到上层设置手势开关生效了  </p>
+</li>
+<li><p>确认 TP 睡眠时有没有成功进入手势模式<br>按 power key 灭屏，看 suspend log 确认是否进入手势模式  </p>
+<pre><code>[ 3858.094688] [HXTP] [himax] himax_chip_common_suspend: SMART_WAKEUP enable, reject suspend
+</code></pre><p>从上述 log 确认到进入了手势模式  </p>
+</li>
+<li><p>确认是否有手势键值上报<br>进入手势模式了，尝试双击看看有没有 event 事件上报。<br>多次画手势动作，均没有看到手势上报对应的 log，确认到没有事件上报  </p>
+</li>
+<li><p>确认熄屏手势 TP 是否产生中断<br>查看 /proc/interrupts 节点，看看有没有检测到 TP 的中断<br>熄屏状态下画手势，TP 中断计数没有增加，确认到没有中断产生<br>怀疑 TP 没有识别到手势，因此没有触发中断。  </p>
+</li>
+<li><p>此问题需要联系 FAE 进一步分析，分析是否是 TP 固件侧的问题<br>最后确认到是固件侧没有识别到手势，没有触发手势中断<br>TP 供应商优化固件后，将 TP 扫描方式从自容扫描修改为互容扫描，提高手势识别率解决了此问题  </p>
+</li>
+</ol>
+<h3 id="实例2：固件升级失败"><a href="#实例2：固件升级失败" class="headerlink" title="实例2：固件升级失败"></a>实例2：固件升级失败</h3><p>供应商发布 0x8 版本的 TP 固件需要合入临时版本给测试验证，出现升级失败的问题。分析过程如下：</p>
+<ol>
+<li><p>0x7 版本三合一刷 0x8 版本固件 –&gt; 升级失败<br>将 0x8 版本固件合入软件中，刷机第一次开机，log 中正确读取了 IC 和 版本中的固件版本号，但是升级函数返回值出错，升级失败  </p>
+<pre><code>[    5.153623] [wjwind] current name = st7703 720p video mode dsi panel
+[    5.159843] [wjwind] IC fw =0xe502 conf = 0x7 Firmware: fw = 0xe502, conf = 0x8
+[    7.207020] [HXTP] irq_enable_count = 0[HXTP][ERROR] i_update_FW: TP upgrade error, upgrade_times = 1
+[    7.216221] [HXTP][ERROR] i_update_FW: TP upgrade error, upgrade_times = 2
+[    7.429449] [HXTP][ERROR] i_update_FW: TP upgrade error, upgrade_times = 3
+</code></pre></li>
+<li><p>0x7 版本三合一刷 0x8 版本固件 –&gt; 升级失败<br>重新启动，看看第二次重启是否 ok，报错同上  </p>
+</li>
+<li><p>0x6 版本三合一刷 0x8 版本固件 –&gt; 升级失败<br>将三合一通过 bat 脚本强制刷到 0x6 版本固件，使用 0x8 固件的软件版本开机，log 中正确读取了 IC 和 版本中的固件版本号，升级还是失败，报错同上  </p>
+<pre><code>[    5.413623] [wjwind] current name = st7703 720p video mode dsi panel
+[    5.419842] [wjwind] IC fw =0xe502 conf = 0x6 Firmware: fw = 0xe502, conf = 0x8
+[    7.418033] [HXTP] irq_enable_count = 0[HXTP][ERROR] i_update_FW: TP upgrade error, upgrade_times = 1
+[    7.418035] [HXTP][ERROR] i_update_FW: TP upgrade error, upgrade_times = 2
+[    7.418037] [HXTP][ERROR] i_update_FW: TP upgrade error, upgrade_times = 3
+</code></pre></li>
+<li><p>0x6 版本三合一刷 0x7 版本固件 –&gt; 升级成功<br>使用上一步刷的 0x6 版本的三合一，刷 0x7 固件的软件版本，开机，升级流程正常</p>
+<pre><code>[    4.768697] [wjwind] current LCM = st7703 720p video mode dsi panel
+[    5.199845] [wjwind] IC fw =0xe502 conf = 0x6 Firmware: fw = 0xe502, conf = 0x7
+[   20.428222] [HXTP] i_update_FW: TP upgrade OK
+</code></pre></li>
+<li><p>怀疑无法升级至 0x8 版本，是 0x8 版本固件存在问题<br>通过 log 发现，log 中读取的固件长度相比于正常固件的大小偏小，最后确认到是因为我使用的是 Foxmail 邮件客户端，收取固件的时候，部分数据丢失。供应商发出的是 165KB 大小固件文件，我通过 Foxmail 接收到的固件只有 125KB，将固件压缩后重发，Foxmail 接收到后并解压得到 165KB 的固件，使用完整的固件升级成功</p>
+</li>
+</ol>
+<h3 id="实例3：手势失效"><a href="#实例3：手势失效" class="headerlink" title="实例3：手势失效"></a>实例3：手势失效</h3><p>部件出现两台手势失效的机器，参考实例1的分析过程，实例3分析过程如下：</p>
+<ol>
+<li>确认到上层手势开关设置生效  </li>
+<li>确认到 TP 睡眠时有进入手势模式  </li>
+<li>确认到没有手势事件上报  </li>
+<li>确认到有中断计数，TP 产生了中断  </li>
+<li><p>查看 TP 中断中的 log，发现异常 log 如下：  </p>
+<pre><code>[ 3858.094688] [HXTP][HIMAX TP MSG] checksum fail : checksum_cal: 0x49C
+[ 3858.636112] [HXTP][HIMAX TP MSG] checksum fail : checksum_cal: 0x7F8
+[ 3858.706841] [HXTP][HIMAX TP MSG] checksum fail : checksum_cal: 0x4C4
+</code></pre><p>查看代码发现，这里 checksum 函数校验的是 TP i2c 回传的数据 buf，在手势模式下会去校验 buf 的格式是否满足手势键值的格式。若发现不符合手势数据 buf 格式，则会打印此 log  </p>
+</li>
+<li><p>约供应商一起分析此问题，复现问题的状态下，通过 proc/android_touch/register 节点查看 8F 状态寄存器<br>确认到 8F 寄存器的值为 0xA0，正常情况进入手势的话，8F 寄存器的值应该是 0x20</p>
+<p>这里介绍下，Himax 的 TP 有三种工作状态，分别是：normal mode([8F] = 0x00)，gesture mode([8F] = 0x20)，hsen mode([8F] = 0x40)。括号中是对应的 8F 寄存器的值，8F 寄存器是工作状态寄存器，其中位5是手势标识位，位6是手套标识位，其他位是保留位，没有使用。<br>TP 在 suspend 函数中会先读取 8F 寄存器中的值，然后根据驱动中的手势使能标识和手套使能标识修改 8F 寄存器的位5和位6，将修改后的值写回 8F 寄存器中。</p>
+<p>在读写 8F 寄存器的位置添加 log 后复现问题，确认到：<br>正常情况下，TP suspend 读取 tp 的 8F 寄存器是读取到 0x00，将手势标识位位5置位后，得到 0x20，写回 TP 中，TP 进入手势模式。<br>异常情况1，读取到的值是 0x80，将位5置位后，得到 0xA0，写回 TP 中，TP 工作状态异常。<br>异常情况2，读取到的值是 0x00，将位5置位后，得到 0x20，写回 TP 中，TP 值没有生效，还是 0x00 。TP 工作状态异常。<br>在上述两种异常情况下，TP 固件侧都未处于手势模式，因此回传的 buf 自然校验不过，就出现了 checksum fail 的情况。  </p>
+<p>问题定位到是 TP 状态寄存器值异常，和 FAE 确认到，驱动在 suspend 中，针对手势和手套有做两次分别读写 8F 的寄存器的动作，在 himax_set_SMWP_enable 手势操作完 8F 寄存器后，此时固件也会去操作 8F 寄存器，获取 TP 的最新状态，固件操作 8F 可能会和 himax_set_HSEN_enable 同时操作到 8F 寄存器，产生冲突，导致值出现异常。<br>供应商有做实验，强制高频率让驱动和固件同时操作 8F 寄存器，看是否高概率出现 8F 寄存器的值不稳定，确认到确实存在这样的情况。最后拟定解决方案为：将手势和手套单独读写修改标识位的方式，修改为一起判断标识位，只做一次读写。具体修改 diff 如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line">diff --git a/drivers/input/touchscreen/HX8527/himax_debug.c b/drivers/input/touchscreen/HX8527/himax_debug.c</span><br><span class="line">index 4f0ea5b..ed3e9a8 100755</span><br><span class="line">--- a/drivers/input/touchscreen/HX8527/himax_debug.c</span><br><span class="line">+++ b/drivers/input/touchscreen/HX8527/himax_debug.c</span><br><span class="line">@@ -2811,7 +2811,8 @@ static ssize_t himax_HSEN_write(struct file *file, const char *buff,</span><br><span class="line">     else</span><br><span class="line">         return -EINVAL;</span><br><span class="line"> </span><br><span class="line">-    himax_set_HSEN_enable(ts-&gt;client, ts-&gt;HSEN_enable, ts-&gt;suspended);</span><br><span class="line">+    // himax_set_HSEN_enable(ts-&gt;client, ts-&gt;HSEN_enable, ts-&gt;suspended);</span><br><span class="line">+    himax_set_work_status(ts-&gt;client, ts-&gt;SMWP_enable, ts-&gt;HSEN_enable, ts-&gt;suspended);</span><br><span class="line"> </span><br><span class="line">     I(&quot;%s: HSEN_enable = %d.\n&quot;, __func__, ts-&gt;HSEN_enable);</span><br><span class="line"> </span><br><span class="line">@@ -2878,7 +2879,8 @@ static ssize_t himax_SMWP_write(struct file *file, const char *buff,</span><br><span class="line">     else</span><br><span class="line">         return -EINVAL;</span><br><span class="line"> </span><br><span class="line">-    himax_set_SMWP_enable(ts-&gt;client, ts-&gt;SMWP_enable, ts-&gt;suspended);</span><br><span class="line">+    // himax_set_SMWP_enable(ts-&gt;client, ts-&gt;SMWP_enable, ts-&gt;suspended);</span><br><span class="line">+    himax_set_work_status(ts-&gt;client, ts-&gt;SMWP_enable, ts-&gt;HSEN_enable, ts-&gt;suspended);</span><br><span class="line"> </span><br><span class="line">     HX_SMWP_EN = ts-&gt;SMWP_enable;</span><br><span class="line">     paul(&quot;SMART_WAKEUP_enable = %d&quot;, HX_SMWP_EN);</span><br><span class="line">diff --git a/drivers/input/touchscreen/HX8527/himax_ic.c b/drivers/input/touchscreen/HX8527/himax_ic.c</span><br><span class="line">index 6611e90..b26ce10 100755</span><br><span class="line">--- a/drivers/input/touchscreen/HX8527/himax_ic.c</span><br><span class="line">+++ b/drivers/input/touchscreen/HX8527/himax_ic.c</span><br><span class="line">@@ -901,6 +901,25 @@ test_retry:</span><br><span class="line">     return pf_value;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line">+void himax_set_work_status(struct i2c_client *client, uint8_t SMWP_enable, uint8_t HSEN_enable, bool suspended)</span><br><span class="line">+&#123;</span><br><span class="line">+    uint8_t buf[4];</span><br><span class="line">+    i2c_himax_read(client, 0x8F, buf, 1, DEFAULT_RETRY_CNT);</span><br><span class="line">+</span><br><span class="line">+    if(SMWP_enable == 1 &amp;&amp; suspended)</span><br><span class="line">+        buf[0] = 0x20 ;</span><br><span class="line">+    else</span><br><span class="line">+        buf[0] = 0x00;</span><br><span class="line">+</span><br><span class="line">+    if(HSEN_enable == 1 &amp;&amp; !suspended)</span><br><span class="line">+        buf[0] = 0x40;</span><br><span class="line">+    else</span><br><span class="line">+        buf[0] &amp;= 0xBF;</span><br><span class="line">+</span><br><span class="line">+    if ( i2c_himax_write(client, 0x8F,buf, 1, DEFAULT_RETRY_CNT) &lt; 0)</span><br><span class="line">+        E(&quot;%s i2c write fail.\n&quot;,__func__);</span><br><span class="line">+&#125;</span><br><span class="line">+</span><br><span class="line"> void himax_set_HSEN_enable(struct i2c_client *client, uint8_t HSEN_enable, bool suspended)</span><br><span class="line"> &#123;</span><br><span class="line">     uint8_t buf[4];</span><br><span class="line">@@ -2268,12 +2293,16 @@ void himax_resend_cmd_func(bool suspended)</span><br><span class="line"> #endif</span><br><span class="line">     &#125;</span><br><span class="line"> </span><br><span class="line">-#ifdef HX_SMART_WAKEUP</span><br><span class="line">-    himax_set_SMWP_enable(ts-&gt;client,ts-&gt;SMWP_enable,suspended);</span><br><span class="line">-#endif</span><br><span class="line">-#ifdef HX_HIGH_SENSE</span><br><span class="line">-    himax_set_HSEN_enable(ts-&gt;client,ts-&gt;HSEN_enable,suspended);</span><br><span class="line">-#endif</span><br><span class="line">+// #ifdef HX_SMART_WAKEUP</span><br><span class="line">+//     himax_set_SMWP_enable(ts-&gt;client,ts-&gt;SMWP_enable,suspended);</span><br><span class="line">+// #endif</span><br><span class="line">+// #ifdef HX_HIGH_SENSE</span><br><span class="line">+//     himax_set_HSEN_enable(ts-&gt;client,ts-&gt;HSEN_enable,suspended);</span><br><span class="line">+// #endif</span><br><span class="line">+</span><br><span class="line">+    himax_set_work_status(ts-&gt;client, ts-&gt;SMWP_enable, ts-&gt;HSEN_enable, suspended);</span><br><span class="line">+</span><br><span class="line"> #ifdef HX_USB_DETECT_GLOBAL</span><br><span class="line">     himax_cable_detect_func(true);</span><br><span class="line"> #endif</span><br><span class="line">diff --git a/drivers/input/touchscreen/HX8527/himax_ic.h b/drivers/input/touchscreen/HX8527/himax_ic.h</span><br><span class="line">index 21361f1..4e0c286 100755</span><br><span class="line">--- a/drivers/input/touchscreen/HX8527/himax_ic.h</span><br><span class="line">+++ b/drivers/input/touchscreen/HX8527/himax_ic.h</span><br><span class="line">@@ -72,6 +72,7 @@ enum fw_image_type</span><br><span class="line"> int himax_hand_shaking(struct i2c_client *client);</span><br><span class="line"> void himax_set_SMWP_enable(struct i2c_client *client,uint8_t SMWP_enable, bool suspended);</span><br><span class="line"> void himax_set_HSEN_enable(struct i2c_client *client,uint8_t HSEN_enable, bool suspended);</span><br><span class="line">+void himax_set_work_status(struct i2c_client *client, uint8_t SMWP_enable, uint8_t HSEN_enable, bool suspended);</span><br><span class="line"> void himax_usb_detect_set(struct i2c_client *client,uint8_t *cable_config);</span><br><span class="line"> int himax_determin_diag_rawdata(int diag_command);</span><br><span class="line"> int himax_determin_diag_storage(int diag_command);</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/maziot/weixin.png" alt="Paul Wang 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/maziot/alipay.png" alt="Paul Wang 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/qcom/" rel="tag"># qcom</a>
+          
+            <a href="/tags/touch/" rel="tag"># touch</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/19/mini2440-build-100ask2drv-dev-env/" rel="next" title="[Mini2440] 搭建韦东山二期驱动视频学习环境">
+                <i class="fa fa-chevron-left"></i> [Mini2440] 搭建韦东山二期驱动视频学习环境
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/02/mini2440-build-100ask3prj-dev-env/" rel="prev" title="[Mini2440] 搭建韦东山三期项目视频学习环境">
+                [Mini2440] 搭建韦东山三期项目视频学习环境 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/maziot/avatar.jpg" alt="Paul Wang">
+            
+              <p class="site-author-name" itemprop="name">Paul Wang</p>
+              <p class="site-description motion-element" itemprop="description">但行好事 莫问前程</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:mz8023yt@163.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/mz8023yt" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/30fc01f695b9" target="_blank" title="Jianshu"><i class="fa fa-fw fa-book"></i>Jianshu</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://mipi.org/" title="mipi" target="_blank">mipi</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://git-scm.com/" title="git" target="_blank">git</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://hexo.io/" title="hexo" target="_blank">hexo</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://theme-next.iissnan.com/" title="next" target="_blank">next</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://ezgif.com/" title="gif" target="_blank">gif</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fontawesome.dashgame.com/" title="font" target="_blank">font</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.kernel.org/" title="kernel" target="_blank">kernel</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实例1：手势失效"><span class="nav-text">实例1：手势失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实例2：固件升级失败"><span class="nav-text">实例2：固件升级失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实例3：手势失效"><span class="nav-text">实例3：手势失效</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Paul Wang</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">309k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">4:false</span>
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Mist</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+      <style>
+        a.gitment-editor-footer-tip { display: none; }
+        .gitment-container.gitment-footer-container { display: none; }
+      </style>
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname,
+            owner: 'mz8023yt',
+            repo: 'blog.comments',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: '41b269fc8cc71a77e91b3485769b325e249b15dd',
+            
+                client_id: '3b0f546a740181c255a9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('3');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
